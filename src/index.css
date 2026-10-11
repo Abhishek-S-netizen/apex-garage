@@ -3611,6 +3611,36 @@ body.zen-mode .macos-dock-header {
         font-size: 15px;
     }
 
+    /* Mobile Binnacle Header: Vertically Stacked & Center Aligned */
+    .cockpit-binnacle-card .bento-header {
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+        gap: 10px !important;
+        margin-bottom: 6px !important;
+    }
+
+    .cockpit-binnacle-card .bento-title-group {
+        align-items: center !important;
+        text-align: center !important;
+        gap: 4px !important;
+    }
+
+    .cockpit-binnacle-card .bento-tag {
+        text-align: center !important;
+    }
+
+    .cockpit-binnacle-card .bento-heading {
+        text-align: center !important;
+        font-size: 15.5px !important;
+    }
+
+    .cockpit-binnacle-card .cluster-controls-group {
+        justify-content: center !important;
+        width: 100% !important;
+        margin-top: 2px !important;
+    }
+
     /* 4. Showroom Brand Curator Stage Mobile Polish */
     .showroom-curator-stage {
         display: none !important;

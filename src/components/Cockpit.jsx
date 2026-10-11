@@ -452,16 +452,21 @@ export default function Cockpit({ fleet, activeView, onOpenDossier, onAddCar, th
             const sandAccent = '#BDA794';
             const sandBright = '#E0D2C5';
 
-            // Dial Geometry (Zero overlap, generous 28px clearance)
+            // Dial Geometry (Zero overlap, generous clearance, mobile adaptive)
+            const isMobile = displayWidth <= 520;
             const centerX = displayWidth * 0.5;
             const centerY = displayHeight * 0.51;
-            const mainRadius = Math.min(displayWidth * 0.17, 134);
-            const auxRadius = Math.round(mainRadius * 0.72); // ~96px
+            const mainRadius = isMobile
+                ? Math.min(displayWidth * 0.155, 62)
+                : Math.min(displayWidth * 0.17, 134);
+            const auxRadius = Math.round(mainRadius * (isMobile ? 0.68 : 0.72));
 
-            const spacing = mainRadius + auxRadius + 28;
+            const spacing = isMobile
+                ? (mainRadius + auxRadius + 10)
+                : (mainRadius + auxRadius + 28);
             const leftX = centerX - spacing;
             const rightX = centerX + spacing;
-            const auxY = centerY + 6;
+            const auxY = isMobile ? centerY + 4 : centerY + 6;
 
             // 1. Auxiliary Left: Car Makes Dial (Sand Beige rev line & glow)
             drawModernAuxDial(ctx, leftX, auxY, auxRadius, p.brandsVal, 12, 'CAR MAKES', sandAccent, sandBright, s.active);
