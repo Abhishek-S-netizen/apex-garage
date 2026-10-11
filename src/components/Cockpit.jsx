@@ -21,7 +21,16 @@ export default function Cockpit({ fleet, activeView, onOpenDossier, onAddCar, th
         return Math.ceil((count + 20) / 50) * 50;
     };
 
+    const calculateAuxMax = (count) => {
+        if (count <= 12) return 12;
+        if (count <= 25) return 25;
+        if (count <= 50) return 50;
+        return Math.ceil((count + 10) / 25) * 25;
+    };
+
     const maxFleet = calculateMilestoneMax(fleet.length);
+    const maxBrands = calculateAuxMax(uniqueBrands.size);
+    const maxMakers = calculateAuxMax(uniqueMakers.size);
 
     // Physics state for smooth needle interpolation
     const physicsRef = useRef({
@@ -39,10 +48,10 @@ export default function Cockpit({ fleet, activeView, onOpenDossier, onAddCar, th
         peakFleet: 20,
         targetFleet: filteredCars.length,
         fromBrands: 0,
-        peakBrands: 14,
+        peakBrands: Math.max(maxBrands, 14),
         targetBrands: uniqueBrands.size,
         fromMakers: 0,
-        peakMakers: 14,
+        peakMakers: Math.max(maxMakers, 14),
         targetMakers: uniqueMakers.size
     });
 
@@ -51,7 +60,9 @@ export default function Cockpit({ fleet, activeView, onOpenDossier, onAddCar, th
         fleet: filteredCars.length,
         brands: uniqueBrands.size,
         makers: uniqueMakers.size,
-        maxFleet: maxFleet
+        maxFleet: maxFleet,
+        maxBrands: maxBrands,
+        maxMakers: maxMakers
     });
 
     useEffect(() => {
@@ -59,9 +70,11 @@ export default function Cockpit({ fleet, activeView, onOpenDossier, onAddCar, th
             fleet: filteredCars.length,
             brands: uniqueBrands.size,
             makers: uniqueMakers.size,
-            maxFleet: maxFleet
+            maxFleet: maxFleet,
+            maxBrands: maxBrands,
+            maxMakers: maxMakers
         };
-    }, [filteredCars.length, uniqueBrands.size, uniqueMakers.size, maxFleet]);
+    }, [filteredCars.length, uniqueBrands.size, uniqueMakers.size, maxFleet, maxBrands, maxMakers]);
 
     const themeTokensRef = useRef(themeTokens);
     useEffect(() => {
@@ -395,10 +408,10 @@ export default function Cockpit({ fleet, activeView, onOpenDossier, onAddCar, th
                     s.peakFleet = Math.max(curTargets.maxFleet, 20);
                     s.targetFleet = curTargets.fleet;
                     s.fromBrands = p.brandsVal || 0;
-                    s.peakBrands = Math.max(curTargets.brands * 2, 14);
+                    s.peakBrands = Math.max(curTargets.maxBrands, 14);
                     s.targetBrands = curTargets.brands;
                     s.fromMakers = p.makersVal || 0;
-                    s.peakMakers = Math.max(curTargets.makers * 2, 14);
+                    s.peakMakers = Math.max(curTargets.maxMakers, 14);
                     s.targetMakers = curTargets.makers;
                     playFerrariGrowlAudio();
                 }
@@ -476,10 +489,10 @@ export default function Cockpit({ fleet, activeView, onOpenDossier, onAddCar, th
             const auxY = isMobile ? centerY + 3 : centerY + 6;
 
             // 1. Auxiliary Left: Car Makes Dial (Sand Beige rev line & glow)
-            drawModernAuxDial(ctx, leftX, auxY, auxRadius, p.brandsVal, 12, 'CAR MAKES', sandAccent, sandBright, s.active, isMobile);
+            drawModernAuxDial(ctx, leftX, auxY, auxRadius, p.brandsVal, curTargets.maxBrands || 12, 'CAR MAKES', sandAccent, sandBright, s.active, isMobile);
 
             // 2. Auxiliary Right: Castings Dial (Sand Beige rev line & glow)
-            drawModernAuxDial(ctx, rightX, auxY, auxRadius, p.makersVal, 12, 'CASTINGS', sandAccent, sandBright, s.active, isMobile);
+            drawModernAuxDial(ctx, rightX, auxY, auxRadius, p.makersVal, curTargets.maxMakers || 12, 'CASTINGS', sandAccent, sandBright, s.active, isMobile);
 
             // 3. Center Tachometer: Fleet Capacity (Performance Redline)
             drawModernCenterTachometer(ctx, centerX, centerY, mainRadius, p.fleetVal, curTargets.maxFleet, accent, accentBright, s.active, isMobile);
