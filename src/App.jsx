@@ -22,9 +22,9 @@ export default function App() {
     const [apexData, setApexData] = useState(() => {
         try {
             const saved = localStorage.getItem('apex_suite_data');
-            if (saved) {
+            if (saved !== null) {
                 const parsed = JSON.parse(saved);
-                if (parsed && parsed.fleet && parsed.fleet.length > 0) return parsed;
+                if (parsed && Array.isArray(parsed.fleet)) return parsed;
             }
         } catch (e) { }
         return DEFAULT_APEX_DATA;
@@ -84,7 +84,7 @@ export default function App() {
         if (isSupabaseConfigured()) {
             fetchRemoteGarage().then(remoteData => {
                 if (remoteData) {
-                    if (remoteData.fleet && remoteData.fleet.length > 0) {
+                    if (Array.isArray(remoteData.fleet)) {
                         setApexData(remoteData);
                         try {
                             localStorage.setItem('apex_suite_data', JSON.stringify(remoteData));
@@ -103,7 +103,7 @@ export default function App() {
                     throw new Error('Offline');
                 })
                 .then(data => {
-                    if (data && data.fleet && data.fleet.length > 0) {
+                    if (data && Array.isArray(data.fleet)) {
                         setApexData(data);
                         try {
                             localStorage.setItem('apex_suite_data', JSON.stringify(data));
