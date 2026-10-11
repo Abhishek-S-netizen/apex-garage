@@ -476,13 +476,13 @@ export default function Cockpit({ fleet, activeView, onOpenDossier, onAddCar, th
             const auxY = isMobile ? centerY + 3 : centerY + 6;
 
             // 1. Auxiliary Left: Car Makes Dial (Sand Beige rev line & glow)
-            drawModernAuxDial(ctx, leftX, auxY, auxRadius, p.brandsVal, 12, 'CAR MAKES', sandAccent, sandBright, s.active);
+            drawModernAuxDial(ctx, leftX, auxY, auxRadius, p.brandsVal, 12, 'CAR MAKES', sandAccent, sandBright, s.active, isMobile);
 
             // 2. Auxiliary Right: Castings Dial (Sand Beige rev line & glow)
-            drawModernAuxDial(ctx, rightX, auxY, auxRadius, p.makersVal, 12, 'CASTINGS', sandAccent, sandBright, s.active);
+            drawModernAuxDial(ctx, rightX, auxY, auxRadius, p.makersVal, 12, 'CASTINGS', sandAccent, sandBright, s.active, isMobile);
 
             // 3. Center Tachometer: Fleet Capacity (Performance Redline)
-            drawModernCenterTachometer(ctx, centerX, centerY, mainRadius, p.fleetVal, curTargets.maxFleet, accent, accentBright, s.active);
+            drawModernCenterTachometer(ctx, centerX, centerY, mainRadius, p.fleetVal, curTargets.maxFleet, accent, accentBright, s.active, isMobile);
 
             ctx.restore();
             animId = requestAnimationFrame(render);
@@ -491,7 +491,7 @@ export default function Cockpit({ fleet, activeView, onOpenDossier, onAddCar, th
         // ══════════════════════════════════════════════════════════════
         // CENTER HYPERCAR TACHOMETER
         // ══════════════════════════════════════════════════════════════
-        const drawModernCenterTachometer = (ctx, cx, cy, r, val, max, accent, accentBright, isRevving) => {
+        const drawModernCenterTachometer = (ctx, cx, cy, r, val, max, accent, accentBright, isRevving, isMobile = false) => {
             const startAngle = Math.PI * 0.75;
             const endAngle = Math.PI * 2.25;
             const totalRange = endAngle - startAngle;
@@ -575,10 +575,10 @@ export default function Cockpit({ fleet, activeView, onOpenDossier, onAddCar, th
                 const cometX = cx + Math.cos(activeAngle) * (r - 15);
                 const cometY = cy + Math.sin(activeAngle) * (r - 15);
                 ctx.beginPath();
-                ctx.arc(cometX, cometY, 3.5, 0, Math.PI * 2);
+                ctx.arc(cometX, cometY, isMobile ? 4.2 : 3.5, 0, Math.PI * 2);
                 ctx.fillStyle = '#FFFFFF';
-                ctx.shadowColor = '#FFFFFF';
-                ctx.shadowBlur = 8;
+                ctx.shadowColor = isMobile ? accentBright : '#FFFFFF';
+                ctx.shadowBlur = isMobile ? 12 : 8;
                 ctx.fill();
                 ctx.shadowBlur = 0;
             }
@@ -610,8 +610,8 @@ export default function Cockpit({ fleet, activeView, onOpenDossier, onAddCar, th
                     : (isMilestone ? 'rgba(255, 255, 255, 0.7)' : 'rgba(255, 255, 255, 0.18)');
                 ctx.stroke();
 
-                // Milestone Numerals
-                if (isMilestone) {
+                // Milestone Numerals (Desktop only for pure clutter-free mobile face)
+                if (isMilestone && !isMobile) {
                     const textR = r - 42;
                     const tx = cx + Math.cos(angle) * textR;
                     const ty = cy + Math.sin(angle) * textR;
@@ -634,11 +634,13 @@ export default function Cockpit({ fleet, activeView, onOpenDossier, onAddCar, th
                 }
             }
 
-            // Step 6: Skeletonized Aero Blade Needle
-            ctx.save();
-            ctx.translate(cx, cy);
-            drawAeroBladeNeedle(ctx, activeAngle, r - 20, accent, accentBright);
-            ctx.restore();
+            // Step 6: Skeletonized Aero Blade Needle (Desktop only)
+            if (!isMobile) {
+                ctx.save();
+                ctx.translate(cx, cy);
+                drawAeroBladeNeedle(ctx, activeAngle, r - 20, accent, accentBright);
+                ctx.restore();
+            }
 
             // Step 7: Floating Smoked-Glass OLED Hub
             ctx.beginPath();
@@ -681,7 +683,7 @@ export default function Cockpit({ fleet, activeView, onOpenDossier, onAddCar, th
         // ══════════════════════════════════════════════════════════════
         // AUXILIARY DIALS (MARQUES & MAKERS)
         // ══════════════════════════════════════════════════════════════
-        const drawModernAuxDial = (ctx, cx, cy, r, val, max, hubLabel, accent, accentBright, isRevving) => {
+        const drawModernAuxDial = (ctx, cx, cy, r, val, max, hubLabel, accent, accentBright, isRevving, isMobile = false) => {
             const startAngle = Math.PI * 0.75;
             const endAngle = Math.PI * 2.25;
             const totalRange = endAngle - startAngle;
@@ -735,9 +737,12 @@ export default function Cockpit({ fleet, activeView, onOpenDossier, onAddCar, th
                 const cometX = cx + Math.cos(activeAngle) * (r - 11);
                 const cometY = cy + Math.sin(activeAngle) * (r - 11);
                 ctx.beginPath();
-                ctx.arc(cometX, cometY, 2.5, 0, Math.PI * 2);
+                ctx.arc(cometX, cometY, isMobile ? 3.5 : 2.5, 0, Math.PI * 2);
                 ctx.fillStyle = '#FFFFFF';
+                ctx.shadowColor = isMobile ? accentBright : 'transparent';
+                ctx.shadowBlur = isMobile ? 8 : 0;
                 ctx.fill();
+                ctx.shadowBlur = 0;
             }
 
             // Fine Micro Ticks
@@ -762,11 +767,13 @@ export default function Cockpit({ fleet, activeView, onOpenDossier, onAddCar, th
                 ctx.stroke();
             }
 
-            // Skeletonized Needle
-            ctx.save();
-            ctx.translate(cx, cy);
-            drawAeroBladeNeedle(ctx, activeAngle, r - 15, accent, accentBright);
-            ctx.restore();
+            // Skeletonized Needle (Desktop only)
+            if (!isMobile) {
+                ctx.save();
+                ctx.translate(cx, cy);
+                drawAeroBladeNeedle(ctx, activeAngle, r - 15, accent, accentBright);
+                ctx.restore();
+            }
 
             // Floating Smoked-Glass OLED Hub (outer bezel)
             ctx.beginPath();
