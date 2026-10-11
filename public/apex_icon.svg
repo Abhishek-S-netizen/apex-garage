@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Metallic Sand-Gold Chamfer Bezel Gradient -->
+    <linearGradient id="goldBezel" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E2D5C8"/>
+      <stop offset="35%" stop-color="#BDA794"/>
+      <stop offset="70%" stop-color="#7A6858"/>
+      <stop offset="100%" stop-color="#CBB7A5"/>
+    </linearGradient>
+
+    <!-- Obsidian Carbon Face Gradient -->
+    <radialGradient id="obsidianFace" cx="50%" cy="45%" r="65%">
+      <stop offset="0%" stop-color="#1F1D1E"/>
+      <stop offset="60%" stop-color="#141314"/>
+      <stop offset="100%" stop-color="#0A090A"/>
+    </radialGradient>
+
+    <!-- Titanium Wing Left Facet (Light) -->
+    <linearGradient id="titaniumLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="30%" stop-color="#D1D4DC"/>
+      <stop offset="70%" stop-color="#8F94A0"/>
+      <stop offset="100%" stop-color="#555861"/>
+    </linearGradient>
+
+    <!-- Titanium Wing Right Facet (Shaded) -->
+    <linearGradient id="titaniumRight" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#B8BCC6"/>
+      <stop offset="40%" stop-color="#848995"/>
+      <stop offset="80%" stop-color="#4E515A"/>
+      <stop offset="100%" stop-color="#2D2F35"/>
+    </linearGradient>
+
+    <!-- Titanium Ridge Line Highlights -->
+    <linearGradient id="ridgeHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="60%" stop-color="#C2C6D1"/>
+      <stop offset="100%" stop-color="#6F737F"/>
+    </linearGradient>
+
+    <!-- Carmine Redline Apex Core Glow -->
+    <linearGradient id="redlineCore" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FF385C"/>
+      <stop offset="50%" stop-color="#D12646"/>
+      <stop offset="100%" stop-color="#8F142A"/>
+    </linearGradient>
+
+    <!-- Intense Neon Red Glow Filter -->
+    <filter id="neonApexGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="9" result="blur1"/>
+      <feGaussianBlur stdDeviation="18" result="blur2"/>
+      <feMerge>
+        <feMergeNode in="blur2"/>
+        <feMergeNode in="blur1"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="subtleBezelDrop" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#000000" flood-opacity="0.85"/>
+    </filter>
+  </defs>
+
+  <!-- Outer Bezel - Squircle Case -->
+  <rect x="24" y="24" width="464" height="464" rx="108" ry="108" fill="url(#goldBezel)" filter="url(#subtleBezelDrop)"/>
+  
+  <!-- Inset Dark Obsidian Face -->
+  <rect x="36" y="36" width="440" height="440" rx="98" ry="98" fill="url(#obsidianFace)"/>
+
+  <!-- Subtle Inner Specular Rim -->
+  <rect x="38" y="38" width="436" height="436" rx="96" ry="96" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="2"/>
+
+  <!-- ══════════ APEX VELOCITY CHEVRON EMBLEM ══════════ -->
+
+  <!-- 1. Deep Core Crimson Ambient Aura -->
+  <path d="M 256 160 L 332 328 L 300 354 L 256 265 L 212 354 L 180 328 Z" fill="none" stroke="#FF1E44" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" filter="url(#neonApexGlow)" opacity="0.65"/>
+
+  <!-- 2. Intense Glowing Apex Inner Arch -->
+  <path d="M 194 336 L 256 215 L 318 336" fill="none" stroke="url(#redlineCore)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" filter="url(#neonApexGlow)"/>
+  <path d="M 194 336 L 256 215 L 318 336" fill="none" stroke="#FFB0BE" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- 3. Left Titanium Aerodynamic Wing (Faceted Surface) -->
+  <!-- Outer blade -->
+  <path d="M 256 118 L 256 168 L 196 295 L 140 376 L 118 376 L 195 240 Z" fill="url(#titaniumLeft)"/>
+  <!-- Main faceted body -->
+  <path d="M 256 118 L 195 240 L 118 376 L 184 376 L 214 316 L 256 226 Z" fill="url(#titaniumLeft)"/>
+
+  <!-- 4. Right Titanium Aerodynamic Wing (Faceted Shadow Surface) -->
+  <!-- Outer blade -->
+  <path d="M 256 118 L 256 168 L 316 295 L 372 376 L 394 376 L 317 240 Z" fill="url(#titaniumRight)"/>
+  <!-- Main faceted body -->
+  <path d="M 256 118 L 317 240 L 394 376 L 328 376 L 298 316 L 256 226 Z" fill="url(#titaniumRight)"/>
+
+  <!-- 5. Razor Central Ridge Line Highlight -->
+  <path d="M 256 118 L 256 226" stroke="url(#ridgeHighlight)" stroke-width="3.5" stroke-linecap="round"/>
+
+  <!-- 6. Left & Right Fin Outer Razor Edges -->
+  <line x1="256" y1="118" x2="118" y2="376" stroke="#FFFFFF" stroke-width="2" opacity="0.7"/>
+  <line x1="256" y1="118" x2="394" y2="376" stroke="rgba(255, 255, 255, 0.4)" stroke-width="1.8"/>
+
+  <!-- 7. Bottom Ground Splitter Anchor Points -->
+  <polygon points="118,376 136,396 172,396 184,376" fill="#4B4E56"/>
+  <polygon points="394,376 376,396 340,396 328,376" fill="#32343A"/>
+</svg>
