@@ -312,7 +312,6 @@ export default function App() {
                             </div>
                         ) : (
                             <div className="viewer-status-chip">
-                                <span className="viewer-lock-icon">🔒</span>
                                 <span className="viewer-label">VIEWER MODE</span>
                                 <button
                                     className="btn-auth-switch"
