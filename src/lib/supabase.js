@@ -6,6 +6,34 @@
 const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL || '').trim().replace(/\/+$/, '');
 const SUPABASE_KEY = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
 
+const SESSION_STORAGE_KEY = 'apex_owner_session';
+
+/**
+ * Get stored session from localStorage
+ */
+export function getStoredSession() {
+    try {
+        const raw = localStorage.getItem(SESSION_STORAGE_KEY);
+        if (!raw) return null;
+        return JSON.parse(raw);
+    } catch (e) {
+        return null;
+    }
+}
+
+/**
+ * Persist active session
+ */
+export function storeSession(session) {
+    try {
+        if (session) {
+            localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+        } else {
+            localStorage.removeItem(SESSION_STORAGE_KEY);
+        }
+    } catch (e) { }
+}
+
 /**
  * Check if the user has provided real Supabase credentials
  */
@@ -18,11 +46,138 @@ export function isSupabaseConfigured() {
     );
 }
 
-const getHeaders = () => ({
-    'apikey': SUPABASE_KEY,
-    'Authorization': `Bearer ${SUPABASE_KEY}`,
-    'Content-Type': 'application/json'
-});
+/**
+ * Returns request headers using the active owner JWT if logged in,
+ * or the anon key if in viewer mode.
+ */
+export const getHeaders = () => {
+    const session = getStoredSession();
+    const token = (session && session.access_token) ? session.access_token : SUPABASE_KEY;
+    return {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+    };
+};
+
+/**
+ * Sign In with Owner Email & Password (Native REST)
+ */
+export async function signInWithOwnerEmail(email, password) {
+    if (!isSupabaseConfigured()) throw new Error('Supabase is not configured.');
+
+    const endpoint = `${SUPABASE_URL}/auth/v1/token?grant_type=password`;
+    const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+            'apikey': SUPABASE_KEY,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email: email.trim(), password })
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+        throw new Error(data.error_description || data.msg || data.message || 'Login failed. Please check credentials.');
+    }
+
+    storeSession(data);
+    return data;
+}
+
+/**
+ * Sign Up with Owner Email & Password (Native REST)
+ */
+export async function signUpWithOwnerEmail(email, password) {
+    if (!isSupabaseConfigured()) throw new Error('Supabase is not configured.');
+
+    const endpoint = `${SUPABASE_URL}/auth/v1/signup`;
+    const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+            'apikey': SUPABASE_KEY,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email: email.trim(), password })
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+        throw new Error(data.error_description || data.msg || data.message || 'Sign up failed.');
+    }
+
+    if (data.access_token) {
+        storeSession(data);
+    }
+    return data;
+}
+
+/**
+ * Sign Out Owner
+ */
+export async function signOutOwner() {
+    const session = getStoredSession();
+    storeSession(null);
+
+    if (session && session.access_token && isSupabaseConfigured()) {
+        try {
+            await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${session.access_token}`
+                }
+            });
+        } catch (e) { }
+    }
+    return true;
+}
+
+/**
+ * Validate token or refresh if expired
+ */
+export async function validateCurrentSession() {
+    const session = getStoredSession();
+    if (!session || !session.access_token) return null;
+
+    try {
+        const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${session.access_token}`
+            }
+        });
+
+        if (res.ok) {
+            const user = await res.json();
+            return { ...session, user };
+        }
+
+        // Token expired, attempt refresh
+        if (session.refresh_token) {
+            const refreshRes = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ refresh_token: session.refresh_token })
+            });
+
+            if (refreshRes.ok) {
+                const refreshed = await refreshRes.json();
+                storeSession(refreshed);
+                return refreshed;
+            }
+        }
+
+        // If refresh failed, session is invalid
+        storeSession(null);
+        return null;
+    } catch (e) {
+        return session; // Offline or temporary network glitch: preserve session
+    }
+}
 
 /**
  * Fetch remote garage data from Supabase
@@ -155,11 +310,14 @@ export async function uploadVehiclePhoto(file) {
     const cleanUrl = SUPABASE_URL.replace(/\/+$/, '');
     const uploadEndpoint = `${cleanUrl}/storage/v1/object/garage-photos/${fileName}`;
 
+    const session = getStoredSession();
+    const token = (session && session.access_token) ? session.access_token : SUPABASE_KEY;
+
     const res = await fetch(uploadEndpoint, {
         method: 'POST',
         headers: {
             'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': 'image/jpeg',
             'x-upsert': 'true'
         },

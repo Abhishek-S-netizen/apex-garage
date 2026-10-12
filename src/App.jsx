@@ -1,7 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { DEFAULT_APEX_DATA } from './data/initialData.js';
 import { useApexTheme } from './theme/themeEngine.js';
-import { fetchRemoteGarage, saveRemoteGarage, isSupabaseConfigured } from './lib/supabase.js';
+import {
+    fetchRemoteGarage,
+    saveRemoteGarage,
+    isSupabaseConfigured,
+    getStoredSession,
+    validateCurrentSession,
+    signOutOwner
+} from './lib/supabase.js';
 
 import MacDock from './components/MacDock.jsx';
 import Cockpit from './components/Cockpit.jsx';
@@ -13,10 +20,37 @@ import ThemeDrawer from './components/ThemeDrawer.jsx';
 import VehicleModal from './components/VehicleModal.jsx';
 import DossierModal from './components/DossierModal.jsx';
 import WishModal from './components/WishModal.jsx';
+import AuthModal from './components/AuthModal.jsx';
 
 export default function App() {
     // Theme Engine
     const { themeState, tokens, updateTheme, resetTheme } = useApexTheme();
+
+    // Owner Security & Session State
+    const [ownerSession, setOwnerSession] = useState(() => getStoredSession());
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+    const isOwnerLoggedIn = Boolean(ownerSession && ownerSession.access_token);
+
+    // Validate active session in background on load
+    useEffect(() => {
+        validateCurrentSession().then(validated => {
+            setOwnerSession(validated);
+        });
+    }, []);
+
+    const handleSignOut = async () => {
+        await signOutOwner();
+        setOwnerSession(null);
+    };
+
+    // Owner Guard: Prompts AuthModal if in Viewer Mode
+    const requireOwner = useCallback((actionFn) => {
+        if (isOwnerLoggedIn) {
+            actionFn();
+        } else {
+            setIsAuthModalOpen(true);
+        }
+    }, [isOwnerLoggedIn]);
 
     // Collection State
     const [apexData, setApexData] = useState(() => {
@@ -252,15 +286,60 @@ export default function App() {
             <div className="ambient-warmth-orb orb-bottom" />
 
             <div className="app-shell" id="appShell">
+                {/* Top Telemetry & Vault Security Status Bar */}
+                <div className="top-status-bar">
+                    <div className="status-brand-mark">
+                        <span className="status-dot" />
+                        <span>VAULT ONLINE</span>
+                    </div>
+
+                    <div className="status-auth-pill">
+                        {isOwnerLoggedIn ? (
+                            <div className="owner-status-chip">
+                                <span className="owner-dot" />
+                                <span className="owner-label">OWNER ACTIVE</span>
+                                {ownerSession?.user?.email && (
+                                    <span className="owner-email">{ownerSession.user.email}</span>
+                                )}
+                                <button
+                                    className="btn-auth-switch"
+                                    onClick={handleSignOut}
+                                    title="Sign out to Viewer Mode"
+                                    type="button"
+                                >
+                                    Log Out
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="viewer-status-chip">
+                                <span className="viewer-lock-icon">🔒</span>
+                                <span className="viewer-label">VIEWER MODE</span>
+                                <button
+                                    className="btn-auth-switch"
+                                    onClick={() => setIsAuthModalOpen(true)}
+                                    title="Sign in as Owner"
+                                    type="button"
+                                >
+                                    Sign In
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
                 {/* macOS Floating Frosted Glass Dock */}
                 <MacDock
                     activeView={activeView}
                     setActiveView={setActiveView}
                     onOpenStudio={() => setIsStudioOpen(true)}
-                    onAddCar={() => {
+                    onAddCar={() => requireOwner(() => {
                         setEditCarId(null);
                         setIsCarModalOpen(true);
-                    }}
+                    })}
+                    isOwnerLoggedIn={isOwnerLoggedIn}
+                    ownerUser={ownerSession?.user}
+                    onOpenAuthModal={() => setIsAuthModalOpen(true)}
+                    onSignOut={handleSignOut}
                 />
 
                 {/* Main Views Container */}
@@ -273,10 +352,10 @@ export default function App() {
                             setDossierCarId(carId);
                             setIsDossierOpen(true);
                         }}
-                        onAddCar={() => {
+                        onAddCar={() => requireOwner(() => {
                             setEditCarId(null);
                             setIsCarModalOpen(true);
-                        }}
+                        })}
                     />
 
                     <Showroom
@@ -286,11 +365,11 @@ export default function App() {
                             setDossierCarId(carId);
                             setIsDossierOpen(true);
                         }}
-                        onEditCar={(carId) => {
+                        onEditCar={(carId) => requireOwner(() => {
                             setEditCarId(carId);
                             setIsCarModalOpen(true);
-                        }}
-                        onToggleFavorite={handleToggleFavorite}
+                        })}
+                        onToggleFavorite={(carId) => requireOwner(() => handleToggleFavorite(carId))}
                     />
 
                     <Registry
@@ -300,34 +379,34 @@ export default function App() {
                             setDossierCarId(carId);
                             setIsDossierOpen(true);
                         }}
-                        onEditCar={(carId) => {
+                        onEditCar={(carId) => requireOwner(() => {
                             setEditCarId(carId);
                             setIsCarModalOpen(true);
-                        }}
-                        onAddCar={() => {
+                        })}
+                        onAddCar={() => requireOwner(() => {
                             setEditCarId(null);
                             setIsCarModalOpen(true);
-                        }}
-                        onToggleFavorite={handleToggleFavorite}
+                        })}
+                        onToggleFavorite={(carId) => requireOwner(() => handleToggleFavorite(carId))}
                         onExportJSON={handleExportJSON}
                     />
 
                     <PegHunt
                         wishlist={apexData.wishlist}
                         activeView={activeView}
-                        onAddWish={() => setIsWishModalOpen(true)}
-                        onGraduateWish={handleGraduateWish}
-                        onDeleteWish={handleDeleteWish}
+                        onAddWish={() => requireOwner(() => setIsWishModalOpen(true))}
+                        onGraduateWish={(wishItem) => requireOwner(() => handleGraduateWish(wishItem))}
+                        onDeleteWish={(wishId) => requireOwner(() => handleDeleteWish(wishId))}
                     />
 
                     <Libraries
                         brands={apexData.brands}
                         makers={apexData.makers}
                         activeView={activeView}
-                        onAddBrand={handleAddBrand}
-                        onDeleteBrand={handleDeleteBrand}
-                        onAddMaker={handleAddMaker}
-                        onDeleteMaker={handleDeleteMaker}
+                        onAddBrand={(b) => requireOwner(() => handleAddBrand(b))}
+                        onDeleteBrand={(b) => requireOwner(() => handleDeleteBrand(b))}
+                        onAddMaker={(m) => requireOwner(() => handleAddMaker(m))}
+                        onDeleteMaker={(m) => requireOwner(() => handleDeleteMaker(m))}
                     />
                 </main>
             </div>
@@ -336,7 +415,7 @@ export default function App() {
             <VehicleModal
                 isOpen={isCarModalOpen}
                 onClose={() => setIsCarModalOpen(false)}
-                onSave={handleSaveCar}
+                onSave={(car) => requireOwner(() => handleSaveCar(car))}
                 brands={apexData.brands}
                 makers={apexData.makers}
                 editCar={activeEditCar}
@@ -346,18 +425,18 @@ export default function App() {
                 isOpen={isDossierOpen}
                 car={activeDossierCar}
                 onClose={() => setIsDossierOpen(false)}
-                onEdit={(carId) => {
+                onEdit={(carId) => requireOwner(() => {
                     setEditCarId(carId);
                     setIsCarModalOpen(true);
-                }}
-                onDelete={handleDeleteCar}
-                onToggleFavorite={handleToggleFavorite}
+                })}
+                onDelete={(carId) => requireOwner(() => handleDeleteCar(carId))}
+                onToggleFavorite={(carId) => requireOwner(() => handleToggleFavorite(carId))}
             />
 
             <WishModal
                 isOpen={isWishModalOpen}
                 onClose={() => setIsWishModalOpen(false)}
-                onSave={handleSaveWish}
+                onSave={(w) => requireOwner(() => handleSaveWish(w))}
                 brands={apexData.brands}
                 makers={apexData.makers}
             />
@@ -369,7 +448,15 @@ export default function App() {
                 updateTheme={handleUpdateTheme}
                 resetTheme={handleResetTheme}
                 apexData={apexData}
-                onImportData={saveAndSyncData}
+                onImportData={(data) => requireOwner(() => saveAndSyncData(data))}
+            />
+
+            <AuthModal
+                isOpen={isAuthModalOpen}
+                onClose={() => setIsAuthModalOpen(false)}
+                onAuthSuccess={(session) => {
+                    setOwnerSession(session);
+                }}
             />
 
             {/* Zen Mode Exit Indicator */}

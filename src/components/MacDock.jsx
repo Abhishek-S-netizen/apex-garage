@@ -1,6 +1,15 @@
 import React from 'react';
 
-export default function MacDock({ activeView, setActiveView, onOpenStudio, onAddCar }) {
+export default function MacDock({
+    activeView,
+    setActiveView,
+    onOpenStudio,
+    onAddCar,
+    isOwnerLoggedIn,
+    ownerUser,
+    onOpenAuthModal,
+    onSignOut
+}) {
     const navItems = [
         {
             key: 'cockpit',
@@ -102,6 +111,39 @@ export default function MacDock({ activeView, setActiveView, onOpenStudio, onAdd
 
                 {/* Dock Action Items */}
                 <div className="dock-actions">
+                    {/* Owner Mode Status / Login Toggle */}
+                    {isOwnerLoggedIn ? (
+                        <button
+                            className="dock-action-btn"
+                            onClick={onSignOut}
+                            title={`Owner Mode: ${ownerUser?.email || 'Active'} (Click to Log Out)`}
+                            type="button"
+                            style={{
+                                color: '#34D399',
+                                borderColor: 'rgba(52, 211, 153, 0.45)',
+                                background: 'rgba(16, 185, 129, 0.12)'
+                            }}
+                        >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                <path d="M7 11V7a5 5 0 0 1 9.9-1" />
+                            </svg>
+                        </button>
+                    ) : (
+                        <button
+                            className="dock-action-btn"
+                            onClick={onOpenAuthModal}
+                            title="Viewer Mode (Click to Sign In as Owner)"
+                            type="button"
+                            style={{ opacity: 0.8 }}
+                        >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                            </svg>
+                        </button>
+                    )}
+
                     <button
                         className="dock-action-btn"
                         onClick={onOpenStudio}
@@ -121,7 +163,7 @@ export default function MacDock({ activeView, setActiveView, onOpenStudio, onAdd
                     <button
                         className="dock-register-btn"
                         onClick={onAddCar}
-                        title="Register New Vehicle (N)"
+                        title={isOwnerLoggedIn ? "Register New Vehicle (N)" : "Sign In to Register Vehicle"}
                         type="button"
                     >
                         <span>+</span>
