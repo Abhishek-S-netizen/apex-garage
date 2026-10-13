@@ -1,5 +1,76 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 
+/**
+ * 3D Parallax Marque Card with Specular Sheen & Floating Z-Depth
+ */
+function ParallaxMarqueCard({ brand, count, index, onSelect, accentColor, isAllFleet = false }) {
+    const cardRef = useRef(null);
+    const [tilt, setTilt] = useState({ rx: 0, ry: 0, mx: 50, my: 50, active: false });
+
+    const handleMouseMove = (e) => {
+        if (!cardRef.current) return;
+        const rect = cardRef.current.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const cx = rect.width / 2;
+        const cy = rect.height / 2;
+        // Refined 4.2 deg max tilt
+        const rx = -((y - cy) / cy) * 4.2;
+        const ry = ((x - cx) / cx) * 4.2;
+        const mx = (x / rect.width) * 100;
+        const my = (y / rect.height) * 100;
+        setTilt({ rx, ry, mx, my, active: true });
+    };
+
+    const handleMouseLeave = () => {
+        setTilt({ rx: 0, ry: 0, mx: 50, my: 50, active: false });
+    };
+
+    return (
+        <div
+            ref={cardRef}
+            className={`curator-marque-card ${isAllFleet ? 'curator-all-fleet-card' : ''}`}
+            onClick={() => onSelect(isAllFleet ? 'all' : brand)}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+            style={{
+                '--card-delay': `${(index || 0) * 0.04}s`,
+                transform: tilt.active
+                    ? `perspective(1000px) rotateX(${tilt.rx.toFixed(2)}deg) rotateY(${tilt.ry.toFixed(2)}deg) scale3d(1.02, 1.02, 1.02)`
+                    : 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)',
+                transition: tilt.active ? 'transform 0.08s ease-out' : 'transform 0.45s cubic-bezier(0.16, 1, 0.3, 1)',
+                '--specular-x': `${tilt.mx}%`,
+                '--specular-y': `${tilt.my}%`
+            }}
+            role="button"
+            tabIndex={0}
+        >
+            <div className="marque-specular-sheen" style={{ opacity: tilt.active ? 1 : 0 }} />
+
+            <div className="marque-card-inner">
+                <div className="marque-card-top">
+                    <span className="marque-count-badge">
+                        {count} {count === 1 ? 'VEHICLE' : 'VEHICLES'}
+                    </span>
+                </div>
+
+                <div className="marque-card-body">
+                    <h3 className="marque-card-name">
+                        {isAllFleet ? 'ALL FLEET' : brand.toUpperCase()}
+                    </h3>
+                </div>
+
+                <div className="marque-card-footer">
+                    <span className="marque-enter-cta">
+                        <span>{isAllFleet ? 'EXPLORE' : 'INSPECT'}</span>
+                        <span className="cta-arrow">→</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export default function Showroom({
     fleet,
     activeView,
@@ -7,7 +78,7 @@ export default function Showroom({
     onEditCar,
     onToggleFavorite
 }) {
-    const [stage, setStage] = useState('curator'); // 'curator' or 'carousel'
+    const [stage, setStage] = useState('curator'); // 'curator', 'carousel', or 'pavilion'
     const [selectedMarque, setSelectedMarque] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
     const [scaleFilter, setScaleFilter] = useState('all');
@@ -81,6 +152,20 @@ export default function Showroom({
         return { marqueDetails: details, sortedBrands: sorted, fleetScaleCounts: scaleCounts };
     }, [curatorFleet]);
 
+    // Segregated Marque Fleet for All Fleet Grand Pavilion
+    const fleetByMarque = useMemo(() => {
+        const groups = {};
+        curatorFleet.forEach(car => {
+            const b = car.brand || 'Bespoke';
+            if (!groups[b]) groups[b] = [];
+            groups[b].push(car);
+        });
+        return sortedBrands.map(b => ({
+            brand: b,
+            cars: groups[b] || []
+        })).filter(g => g.cars.length > 0);
+    }, [curatorFleet, sortedBrands]);
+
     // Keyboard navigation in carousel stage
     useEffect(() => {
         if (activeView !== 'showroom' || stage !== 'carousel') return;
@@ -99,11 +184,15 @@ export default function Showroom({
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [activeView, stage]);
 
-    // Direct 1-Click Showroom Entry
+    // Direct Showroom Entry
     const handleSelectMarqueAndEnter = (brandKey) => {
         setSelectedMarque(brandKey);
         setActiveIndex(0);
-        setStage('carousel');
+        if (brandKey === 'all') {
+            setStage('pavilion'); // Scalable 100+ car Grand Pavilion Gallery!
+        } else {
+            setStage('carousel'); // 3D Turntable Ring for individual brand!
+        }
     };
 
     const handleReturnToCurator = () => {
@@ -159,7 +248,7 @@ export default function Showroom({
             <div className={`showroom-curator-stage ${stage === 'curator' ? 'active' : ''}`} id="showroomCuratorStage">
                 <div className="curator-hero-header">
                     <div className="curator-tag-pill">PRIVATE ATELIER SHOWCASE</div>
-                    <h2 className="curator-hero-title">Select Marque to Enter Showroom</h2>
+                    <h2 className="curator-hero-title">SELECT MARQUE TO ENTER SHOWROOM</h2>
                 </div>
 
                 {/* Search & Scale Filter Toolbar */}
@@ -189,7 +278,7 @@ export default function Showroom({
                     </div>
 
                     <div className="curator-scale-pills" id="curatorScalePills">
-                        {['all', '1:18', '1:43', '1:64'].map(scale => (
+                        {['all', '1:18', '1:24', '1:32', '1:40', '1:43', '1:64'].map(scale => (
                             <button
                                 key={scale}
                                 className={`curator-scale-btn ${scaleFilter === scale ? 'active' : ''}`}
@@ -202,97 +291,32 @@ export default function Showroom({
                     </div>
                 </div>
 
-                {/* 1. ALL FLEET Grand Pavilion Banner */}
-                <div
-                    className="curator-master-banner"
-                    onClick={() => handleSelectMarqueAndEnter('all')}
-                    title="Click to enter 3D Showroom with all vehicles"
-                    role="button"
-                    tabIndex={0}
-                >
-                    <div className="master-banner-glass" />
-                    <div className="master-banner-content">
-                        <div className="master-banner-left">
-                            <h3 className="master-banner-title">ALL FLEET SHOWCASE</h3>
-                            <p className="master-banner-desc">
-                                Inspect all {curatorFleet.length} precision models across {sortedBrands.length} marques in an uninterrupted 3D Cover Flow ring.
-                            </p>
-                            <div className="master-banner-scales">
-                                {Object.entries(fleetScaleCounts).map(([scale, count]) => (
-                                    <span key={scale} className="master-scale-chip">
-                                        {scale} ({count})
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="master-banner-right">
-                            <div className="master-count-box">
-                                <span className="master-count-digit">{curatorFleet.length}</span>
-                                <span className="master-count-label">TOTAL VEHICLES</span>
-                            </div>
-                            <button
-                                className="master-enter-btn"
-                                type="button"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleSelectMarqueAndEnter('all');
-                                }}
-                            >
-                                <span>ENTER FULL SHOWROOM</span>
-                                <span className="master-btn-arrow">→</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* 2. Individual Marque Cards Grid */}
+                {/* Unified Apple-Style Marque Vitrine Grid */}
                 <div className="curator-marque-grid" id="curatorMarqueGrid">
-                    {sortedBrands.map(brand => {
+                    {/* Card 0: ALL FLEET Premier Vitrine */}
+                    <ParallaxMarqueCard
+                        brand="All Fleet"
+                        count={curatorFleet.length}
+                        index={0}
+                        accentColor="#BDA794"
+                        onSelect={handleSelectMarqueAndEnter}
+                        isAllFleet={true}
+                    />
+
+                    {/* Brand Vitrines */}
+                    {sortedBrands.map((brand, idx) => {
                         const info = marqueDetails[brand];
-                        const count = info?.count || 1;
-                        const modelsText = (info?.models || []).join(' · ');
-                        const heroImg = info?.heroImage;
-                        const scalesArray = Array.from(info?.scales || []);
+                        const accent = BRAND_HERITAGE_ACCENTS[brand] || '#BDA794';
 
                         return (
-                            <div
+                            <ParallaxMarqueCard
                                 key={brand}
-                                className="curator-marque-card"
-                                onClick={() => handleSelectMarqueAndEnter(brand)}
-                                role="button"
-                                tabIndex={0}
-                            >
-                                <div className="marque-card-inner">
-                                    <div className="marque-card-top">
-                                        <div className="marque-brand-identity">
-                                            <span className="marque-tag-label">MARQUE</span>
-                                        </div>
-                                        <span className="marque-count-badge">
-                                            {count} {count === 1 ? 'MODEL' : 'MODELS'}
-                                        </span>
-                                    </div>
-
-                                    <div className="marque-card-body">
-                                        <h3 className="marque-card-name">{brand.toUpperCase()}</h3>
-                                        <p className="marque-card-models">
-                                            {modelsText || 'Bespoke precision casting'}
-                                        </p>
-                                    </div>
-
-                                    <div className="marque-card-footer">
-                                        <div className="marque-scales-list">
-                                            {scalesArray.map(sc => (
-                                                <span key={sc} className="marque-scale-pill">{sc}</span>
-                                            ))}
-                                        </div>
-                                        <span className="marque-enter-cta">
-                                            <span>INSPECT</span>
-                                            <span className="cta-arrow">→</span>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
+                                brand={brand}
+                                count={info?.count || 1}
+                                index={idx + 1}
+                                accentColor={accent}
+                                onSelect={handleSelectMarqueAndEnter}
+                            />
                         );
                     })}
                 </div>
@@ -315,7 +339,7 @@ export default function Showroom({
                         <span>BACK TO MARQUES</span>
                     </button>
 
-                    {/* Header Dots Indicator (replaces ALL FLEET 01/06) */}
+                    {/* Header Dots Indicator */}
                     <div className="carousel-dots-row carousel-header-dots" id="carouselHeaderDots">
                         {carouselFleet.map((_, i) => (
                             <div
@@ -326,6 +350,8 @@ export default function Showroom({
                             />
                         ))}
                     </div>
+
+
 
                     <div className="carousel-nav-arrows">
                         <button
@@ -470,6 +496,104 @@ export default function Showroom({
                     <div className="carousel-key-hint">
                         <span>Press <kbd>←</kbd> <kbd>→</kbd> arrow keys or click flanking cards to rotate</span>
                     </div>
+                </div>
+            </div>
+
+            {/* ══════════════════════════════════════════════════════════════
+                 STAGE 3: ALL FLEET GRAND PAVILION GALLERY (SCALABLE 100+ CARS)
+            ══════════════════════════════════════════════════════════════ */}
+            <div className={`showroom-pavilion-stage ${stage === 'pavilion' ? 'active' : ''}`} id="showroomPavilionStage">
+                {/* Pavilion Top Header Shelf */}
+                <div className="pavilion-top-shelf">
+                    <button
+                        className="btn-showroom-back"
+                        onClick={handleReturnToCurator}
+                        title="Return to Brand Selection"
+                        type="button"
+                    >
+                        <span>←</span>
+                        <span>BACK TO MARQUES</span>
+                    </button>
+
+                    <div className="pavilion-title-group">
+                        <span className="pavilion-tag">GRAND ATELIER ARCHIVE</span>
+                        <h2 className="pavilion-heading">
+                            ALL FLEET GALLERY
+                            <span className="pavilion-count-pill">{curatorFleet.length} VEHICLES</span>
+                        </h2>
+                    </div>
+                </div>
+
+                {/* Segregated by Marque Sections */}
+                <div className="pavilion-brands-container">
+                    {fleetByMarque.map(group => {
+                        const accent = BRAND_HERITAGE_ACCENTS[group.brand] || '#BDA794';
+                        return (
+                            <div className="pavilion-brand-section" key={group.brand}>
+                                <div className="pavilion-brand-header">
+                                    <div className="pavilion-brand-title-wrap">
+                                        <span
+                                            className="pavilion-brand-accent-line"
+                                            style={{ background: accent }}
+                                        />
+                                        <h3 className="pavilion-brand-heading">{group.brand.toUpperCase()}</h3>
+                                        <span className="pavilion-brand-badge">
+                                            {group.cars.length} {group.cars.length === 1 ? 'MODEL' : 'MODELS'}
+                                        </span>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        className="pavilion-brand-turntable-btn"
+                                        onClick={() => {
+                                            setSelectedMarque(group.brand);
+                                            setActiveIndex(0);
+                                            setStage('carousel');
+                                        }}
+                                        title={`Inspect ${group.brand} on 3D Turntable`}
+                                    >
+                                        <span>⟳ 3D TURNTABLE</span>
+                                    </button>
+                                </div>
+
+                                <div className="pavilion-grid">
+                                    {group.cars.map(car => (
+                                        <div
+                                            key={car.id}
+                                            className="pavilion-car-card"
+                                            onClick={() => onOpenDossier(car.id)}
+                                            role="button"
+                                            tabIndex={0}
+                                        >
+                                            <div className="pavilion-car-photo-wrap">
+                                                <img
+                                                    src={car.photoUrl || 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?q=80&w=800&auto=format&fit=crop'}
+                                                    alt={car.model}
+                                                    loading="lazy"
+                                                />
+                                                <div className="pavilion-card-badges">
+                                                    <span className="pavilion-scale-badge">{car.scale || '1:18'}</span>
+                                                    {car.isFavorite && <span className="pavilion-fav-star">★</span>}
+                                                </div>
+                                            </div>
+
+                                            <div className="pavilion-car-info">
+                                                <div className="pavilion-mobile-row">
+                                                    <span className="pavilion-mobile-scale-pill">{car.scale || '1:18'}</span>
+                                                    <span className="pavilion-car-brand">{(car.brand || 'Bespoke').toUpperCase()}</span>
+                                                </div>
+                                                <h4 className="pavilion-car-model">{car.model}</h4>
+                                                <div className="pavilion-car-meta">
+                                                    <span className="pavilion-maker">{car.maker || '—'}</span>
+                                                    {car.year && <span className="pavilion-year">{car.year}</span>}
+                                                </div>
+                                            </div>
+                                            <span className="pavilion-mobile-chevron" aria-hidden="true">›</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
         </section>

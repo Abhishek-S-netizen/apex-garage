@@ -13,12 +13,13 @@ export default function Cockpit({ fleet, activeView, onOpenDossier, onAddCar, th
     const uniqueBrands = new Set(fleet.map(c => c.brand).filter(Boolean));
     const uniqueMakers = new Set(fleet.map(c => c.maker).filter(Boolean));
 
-    // Milestone calculation for capacity
+    // Milestone calculation for capacity: Open Runway buffer in steps of 25
     const calculateMilestoneMax = (count) => {
-        if (count <= 20) return 20;
-        if (count <= 50) return 50;
-        if (count <= 100) return 100;
-        return Math.ceil((count + 20) / 50) * 50;
+        if (count <= 18) return 25;
+        if (count <= 36) return 50;
+        if (count <= 56) return 75;
+        if (count <= 78) return 100;
+        return Math.ceil((count + 20) / 25) * 25;
     };
 
     const calculateAuxMax = (count) => {
@@ -597,16 +598,11 @@ export default function Cockpit({ fleet, activeView, onOpenDossier, onAddCar, th
             }
 
             // Step 5: Clean Milestone Indexing & Micro-Etched Graduation Hairlines
-            const milestoneStep = max <= 20 ? 5 : (max <= 50 ? 10 : 25);
             const totalTicks = 40;
-
             for (let i = 0; i <= totalTicks; i++) {
                 const angle = startAngle + (i / totalTicks) * totalRange;
-                const tickVal = (i / totalTicks) * max;
-                const isMilestone = Math.abs(tickVal % milestoneStep) < 0.1 || i === totalTicks || i === 0;
                 const isRedZone = (i / totalTicks) >= 0.8;
-
-                const innerR = isMilestone ? r - 30 : r - 22;
+                const innerR = r - 22;
                 const outerR = r - 18;
 
                 const x1 = cx + Math.cos(angle) * innerR;
@@ -617,32 +613,52 @@ export default function Cockpit({ fleet, activeView, onOpenDossier, onAddCar, th
                 ctx.beginPath();
                 ctx.moveTo(x1, y1);
                 ctx.lineTo(x2, y2);
-                ctx.lineWidth = isMilestone ? 2 : 0.8;
-                ctx.strokeStyle = isRedZone
-                    ? '#FF3B30'
-                    : (isMilestone ? 'rgba(255, 255, 255, 0.7)' : 'rgba(255, 255, 255, 0.18)');
+                ctx.lineWidth = 0.8;
+                ctx.strokeStyle = isRedZone ? '#FF3B30' : 'rgba(255, 255, 255, 0.18)';
+                ctx.stroke();
+            }
+
+            // Dedicated Major Milestone Marks & Numerals (Guarantees every milestone is rendered)
+            const milestoneStep = max <= 25 ? 5 : (max <= 50 ? 10 : 25);
+            for (let m = 0; m <= max; m += milestoneStep) {
+                const ratio = m / max;
+                const angle = startAngle + ratio * totalRange;
+                const isRedZone = ratio >= 0.8;
+
+                // Major Milestone Tick Mark
+                const innerR = r - 30;
+                const outerR = r - 18;
+                const x1 = cx + Math.cos(angle) * innerR;
+                const y1 = cy + Math.sin(angle) * innerR;
+                const x2 = cx + Math.cos(angle) * outerR;
+                const y2 = cy + Math.sin(angle) * outerR;
+
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.lineWidth = 2.2;
+                ctx.strokeStyle = isRedZone ? '#FF3B30' : 'rgba(255, 255, 255, 0.75)';
                 ctx.stroke();
 
-                // Milestone Numerals (Desktop only for pure clutter-free mobile face)
-                if (isMilestone && !isMobile) {
-                    const textR = r - 42;
+                // Milestone Numeral (Desktop only)
+                if (!isMobile) {
+                    const textR = r - 43;
                     const tx = cx + Math.cos(angle) * textR;
                     const ty = cy + Math.sin(angle) * textR;
-                    const milestoneNum = Math.round(tickVal);
 
-                    const isNearby = Math.abs(clampedVal - milestoneNum) <= (milestoneStep * 0.45);
+                    const isNearby = Math.abs(clampedVal - m) <= (milestoneStep * 0.45);
 
-                    ctx.font = isNearby ? '700 11.5px Jura, monospace' : '600 10.5px Jura, monospace';
+                    ctx.font = isNearby ? '700 10.5px Jura, monospace' : '600 9.5px Jura, monospace';
                     ctx.fillStyle = isRedZone
                         ? '#FF3B30'
-                        : (isNearby ? '#FFFFFF' : 'rgba(189, 167, 148, 0.65)');
+                        : (isNearby ? '#FFFFFF' : 'rgba(189, 167, 148, 0.75)');
                     if (isNearby) {
                         ctx.shadowColor = isRedZone ? '#FF3B30' : accentBright;
                         ctx.shadowBlur = 6;
                     }
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.fillText(String(milestoneNum), tx, ty);
+                    ctx.fillText(String(m), tx, ty);
                     ctx.shadowBlur = 0;
                 }
             }
@@ -676,17 +692,17 @@ export default function Cockpit({ fleet, activeView, onOpenDossier, onAddCar, th
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
             ctx.stroke();
 
-            // ── Minimalist Clean Hub: Keep ONLY "FLEET" and the bold number ──
-            ctx.font = '700 9px Jura, monospace';
+            // ── Minimalist Clean Hub: Keep ONLY "FLEET" and the refined number ──
+            ctx.font = '700 8.5px Jura, monospace';
             ctx.fillStyle = 'rgba(189, 167, 148, 0.85)';
             ctx.textAlign = 'center';
-            ctx.fillText('FLEET', cx, cy - 8);
+            ctx.fillText('FLEET', cx, cy - 7);
 
-            ctx.font = '700 24px Syncopate, sans-serif';
+            ctx.font = '700 18px Syncopate, sans-serif';
             ctx.fillStyle = '#FFFFFF';
             ctx.shadowColor = accentBright;
-            ctx.shadowBlur = 8;
-            ctx.fillText(String(Math.round(clampedVal)), cx, cy + 14);
+            ctx.shadowBlur = 6;
+            ctx.fillText(String(Math.round(clampedVal)), cx, cy + 11);
             ctx.shadowBlur = 0;
 
             // Step 8: Sapphire Crystal Anti-Reflective Coating Sheen
@@ -817,13 +833,13 @@ export default function Cockpit({ fleet, activeView, onOpenDossier, onAddCar, th
                 ctx.fillText(hubLabel, cx, cy - 6);
             }
 
-            // Bold Telemetry Digit
-            ctx.font = '700 18px Syncopate, sans-serif';
+            // Refined Telemetry Digit
+            ctx.font = '700 13.5px Syncopate, sans-serif';
             ctx.fillStyle = '#FFFFFF';
             ctx.textAlign = 'center';
             ctx.shadowColor = accentBright;
-            ctx.shadowBlur = 6;
-            ctx.fillText(String(Math.round(clampedVal)), cx, cy + (hubLabel ? 12 : 7));
+            ctx.shadowBlur = 5;
+            ctx.fillText(String(Math.round(clampedVal)), cx, cy + (hubLabel ? 9 : 5));
             ctx.shadowBlur = 0;
 
             // Sapphire AR Coating
@@ -866,7 +882,7 @@ export default function Cockpit({ fleet, activeView, onOpenDossier, onAddCar, th
                         </div>
                     </div>
 
-                    {/* Canvas Housing (Responsive High-DPI Canvas) */}
+                    {/* Canvas Housing (Responsive High-DPI Canvas - Desktop) */}
                     <div className="canvas-gauges-wrapper">
                         <canvas
                             ref={canvasRef}
@@ -875,6 +891,37 @@ export default function Cockpit({ fleet, activeView, onOpenDossier, onAddCar, th
                             onClick={triggerNeedleSweep}
                             title="Click gauges to rev needles with Ferrari engine growl"
                         />
+                    </div>
+
+                    {/* Mobile Telemetry HUD: Minimalist Digital Readout (Active on <= 768px, hidden on desktop) */}
+                    <div className="mobile-cockpit-hud">
+                        <div className="mobile-hud-primary">
+                            <div className="mobile-hud-primary-top">
+                                <span className="mobile-hud-tag">TOTAL FLEET</span>
+                                <span className="mobile-hud-subtag">NEXT GOAL: {maxFleet}</span>
+                            </div>
+                            <div className="mobile-hud-primary-main">
+                                <span className="mobile-hud-big-num">{filteredCars.length}</span>
+                                <span className="mobile-hud-max-denom">/ {maxFleet}</span>
+                            </div>
+                            <div className="mobile-hud-bar-track">
+                                <div
+                                    className="mobile-hud-bar-fill"
+                                    style={{ width: `${Math.min(100, Math.round((filteredCars.length / Math.max(1, maxFleet)) * 100))}%` }}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="mobile-hud-aux-grid">
+                            <div className="mobile-hud-aux-card">
+                                <span className="mobile-hud-aux-label">MARQUES</span>
+                                <span className="mobile-hud-aux-val">{uniqueBrands.size}</span>
+                            </div>
+                            <div className="mobile-hud-aux-card">
+                                <span className="mobile-hud-aux-label">CASTINGS</span>
+                                <span className="mobile-hud-aux-val">{uniqueMakers.size}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -892,6 +939,9 @@ export default function Cockpit({ fleet, activeView, onOpenDossier, onAddCar, th
                             {[
                                 { key: 'all', label: `ALL (${fleet.length})` },
                                 { key: '1:18', label: `1:18 (${fleet.filter(c => c.scale === '1:18').length})` },
+                                { key: '1:24', label: `1:24 (${fleet.filter(c => c.scale === '1:24').length})` },
+                                { key: '1:32', label: `1:32 (${fleet.filter(c => c.scale === '1:32').length})` },
+                                { key: '1:40', label: `1:40 (${fleet.filter(c => c.scale === '1:40').length})` },
                                 { key: '1:43', label: `1:43 (${fleet.filter(c => c.scale === '1:43').length})` },
                                 { key: '1:64', label: `1:64 (${fleet.filter(c => c.scale === '1:64').length})` }
                             ].map(item => (

@@ -421,7 +421,7 @@ body {
     display: grid;
     grid-template-columns: 1.85fr 1fr;
     gap: 26px;
-    margin-top: 38px;
+    margin-top: 10px;
     margin-bottom: 36px;
 }
 
@@ -796,56 +796,47 @@ body {
     }
 }
 
-/* Stage 1: Brand Curator Floor */
+/* Stage 1: Brand Curator Hero Header */
 .curator-hero-header {
-    text-align: center;
-    padding: 24px 20px 10px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 8px;
+    gap: 6px;
+    margin-bottom: 6px;
 }
 
 .curator-tag-pill {
     font-family: var(--font-mono);
-    font-size: 10.5px;
+    font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.16em;
-    color: var(--accent-bright);
-    background: var(--accent-subtle);
-    border: 1px solid var(--accent-border);
-    padding: 4px 14px;
-    border-radius: 999px;
-}
-
-.curator-hero-title {
-    font-family: var(--font-head);
-    font-size: 26px;
-    font-weight: 700;
-    color: #FFFFFF;
-    letter-spacing: 0.12em;
-    line-height: 1.2;
+    color: #BDA794;
     text-transform: uppercase;
 }
 
-.curator-hero-sub {
-    font-size: 13.5px;
-    color: var(--text-secondary);
-    max-width: 620px;
-    line-height: 1.5;
+.curator-hero-title {
+    font-family: var(--font-head), 'Syncopate', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: #FFFFFF;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    line-height: 1.25;
 }
 
+/* Stage 1: Brand Curator Floor Toolbar */
 .curator-toolbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    background: #BDA794;
-    border: 1px solid rgba(255, 255, 255, 0.45);
+    background: rgba(26, 23, 24, 0.75);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(189, 167, 148, 0.25);
     border-radius: var(--radius-xl);
     padding: 8px 16px;
-    margin-bottom: 20px;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    margin-bottom: 22px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.1);
     flex-wrap: wrap;
 }
 
@@ -853,30 +844,30 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    background: rgba(26, 24, 25, 0.08);
-    border: 1px solid rgba(26, 24, 25, 0.18);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(189, 167, 148, 0.2);
     border-radius: var(--radius-md);
-    padding: 7px 14px;
+    padding: 8px 14px;
     flex: 1;
     min-width: 240px;
-    color: #1A1819;
+    color: #FFFFFF;
     transition: all 0.2s ease;
 }
 
 .curator-search-box svg {
-    color: #1A1819;
+    color: #BDA794;
 }
 
 .curator-search-box:focus-within {
-    border-color: #1A1819;
-    background: rgba(26, 24, 25, 0.12);
-    box-shadow: 0 0 10px rgba(26, 24, 25, 0.15);
+    border-color: rgba(189, 167, 148, 0.6);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 16px rgba(189, 167, 148, 0.2);
 }
 
 .curator-search-box input {
     background: transparent;
     border: none;
-    color: #1A1819;
+    color: #FFFFFF;
     font-family: var(--font-body);
     font-size: 13px;
     font-weight: 500;
@@ -885,23 +876,23 @@ body {
 }
 
 .curator-search-box input::placeholder {
-    color: rgba(26, 24, 25, 0.6);
+    color: rgba(255, 255, 255, 0.4);
 }
 
 .curator-scale-pills {
     display: flex;
     align-items: center;
     gap: 4px;
-    background: rgba(26, 24, 25, 0.08);
+    background: rgba(255, 255, 255, 0.04);
     padding: 3px;
     border-radius: var(--radius-md);
-    border: 1px solid rgba(26, 24, 25, 0.16);
+    border: 1px solid rgba(189, 167, 148, 0.18);
 }
 
 .curator-scale-btn {
     background: transparent;
     border: 1px solid transparent;
-    color: rgba(26, 24, 25, 0.75);
+    color: rgba(255, 255, 255, 0.65);
     font-family: var(--font-mono);
     font-size: 11px;
     font-weight: 700;
@@ -913,187 +904,487 @@ body {
 }
 
 .curator-scale-btn:hover {
-    color: #1A1819;
-    background: rgba(26, 24, 25, 0.1);
+    color: #FFFFFF;
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .curator-scale-btn.active {
-    background: #1A1819;
-    border-color: #1A1819;
-    color: #F4EFEB;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    background: #BDA794;
+    border-color: #BDA794;
+    color: #1A1819;
+    box-shadow: 0 2px 10px rgba(189, 167, 148, 0.35);
 }
 
 /* ──────────────────────────────────────────────────────────────────
    STAGE 1: GRAND PAVILION & VISUAL MARQUE GATEWAY
-────────────────────────────────────────────────────────────────── */
-
-/* 1. Grand ALL FLEET Pavilion Banner - Sand Beige Luxury Chassis */
-.curator-master-banner {
-    position: relative;
-    background: #BDA794;
-    border: 1px solid rgba(255, 255, 255, 0.45);
-    border-radius: 20px;
-    padding: 22px 28px;
-    margin-bottom: 22px;
-    cursor: pointer;
-    overflow: hidden;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.4);
-    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.curator-master-banner:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.6), 0 0 24px rgba(189, 167, 148, 0.25);
-}
-
-.curator-master-banner::before {
-    display: none;
-}
-
-.master-banner-content {
-    position: relative;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px;
-    flex-wrap: wrap;
-}
-
-.master-banner-left {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    max-width: 620px;
-}
-
-.master-banner-title {
-    font-family: var(--font-mono);
-    font-size: 21px;
-    font-weight: 700;
-    color: #1A1819;
-    letter-spacing: 0.12em;
-    margin-top: 2px;
-}
-
-.master-banner-desc {
-    font-family: var(--font-body);
-    font-size: 13px;
-    color: rgba(26, 24, 25, 0.78);
-    line-height: 1.45;
-}
-
-.master-banner-scales {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 6px;
-}
-
-.master-scale-chip {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    color: #1A1819;
-    background: rgba(26, 24, 25, 0.08);
-    border: 1px solid rgba(26, 24, 25, 0.2);
-    padding: 2px 10px;
-    border-radius: 6px;
-}
-
-.master-banner-right {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-}
-
-.master-count-box {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-}
-
-.master-count-digit {
-    font-family: var(--font-mono);
-    font-size: 32px;
-    font-weight: 700;
-    color: #1A1819;
-    line-height: 1;
-}
-
-.master-count-label {
-    font-family: var(--font-mono);
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    color: rgba(26, 24, 25, 0.7);
-    margin-top: 4px;
-}
-
-.master-enter-btn {
-    background: #1A1819;
-    color: #F4EFEB;
-    border: 1px solid rgba(26, 24, 25, 0.3);
-    font-family: var(--font-mono);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    padding: 11px 22px;
-    border-radius: 999px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
-    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.master-enter-btn:hover {
-    background: #000000;
-    color: #FFFFFF;
-    transform: scale(1.03);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
-}
-
-.master-btn-arrow {
-    font-size: 14px;
-    transition: transform 0.2s ease;
-}
-
-.master-enter-btn:hover .master-btn-arrow {
-    transform: translateX(4px);
-}
-
-/* 2. Visual Marque Cards Grid - Compact Precision Boxes */
+   ────────────────────────────────────────────────────────────────── */
+/* 2. Visual Marque Cards Grid - Apple Studio Vitrine Architecture */
 .curator-marque-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 18px;
+    perspective: 1200px;
+}
+
+@keyframes placeBoxOnTable {
+    0% {
+        opacity: 0;
+        transform: perspective(1000px) rotateX(15deg) translateY(32px) scale(0.95);
+    }
+
+    70% {
+        opacity: 0.95;
+        transform: perspective(1000px) rotateX(-2deg) translateY(-2px) scale(1.008);
+    }
+
+    100% {
+        opacity: 1;
+        transform: perspective(1000px) rotateX(0deg) translateY(0) scale(1);
+    }
 }
 
 .curator-marque-card {
     position: relative;
-    background: #1A1819;
-    border: 1px solid rgba(189, 167, 148, 0.2);
-    border-radius: 14px;
-    padding: 14px 16px 12px;
+    background: rgba(26, 23, 25, 0.75);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 16px 20px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    min-height: 125px;
+    min-height: 124px;
     cursor: pointer;
     overflow: hidden;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
-    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    transform-style: preserve-3d;
+    will-change: transform;
+    animation: placeBoxOnTable 0.55s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+    animation-delay: var(--card-delay, 0s);
+    transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
 }
 
 .curator-marque-card:hover {
-    transform: translateY(-2px);
+    background: rgba(32, 28, 30, 0.88);
+    border-color: rgba(189, 167, 148, 0.45);
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.65), 0 0 20px rgba(189, 167, 148, 0.12);
+}
+
+/* Card 0: ALL FLEET Desert Sand Signature Vitrine */
+.curator-marque-card.curator-all-fleet-card {
+    background: #BDA794;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+}
+
+.curator-marque-card.curator-all-fleet-card:hover {
+    background: #C7B2A0;
+    border-color: #FFFFFF;
+    box-shadow: 0 16px 38px rgba(189, 167, 148, 0.4), 0 0 20px rgba(189, 167, 148, 0.3);
+}
+
+.curator-marque-card.curator-all-fleet-card .marque-count-badge {
+    color: #141214;
+    background: rgba(20, 18, 20, 0.12);
+    border: 1px solid rgba(20, 18, 20, 0.2);
+    font-weight: 800;
+}
+
+.curator-marque-card.curator-all-fleet-card .marque-card-name {
+    color: #141214;
+    text-shadow: none;
+    font-weight: 800;
+}
+
+.curator-marque-card.curator-all-fleet-card .marque-card-footer {
+    border-top-color: rgba(20, 18, 20, 0.18);
+}
+
+.curator-marque-card.curator-all-fleet-card .marque-enter-cta {
+    color: #141214;
+    font-weight: 800;
+}
+
+.curator-marque-card.curator-all-fleet-card:hover .marque-enter-cta {
+    color: #000000;
+}
+
+/* Specular Glare Layer (Follows Mouse Coordinates) */
+.marque-specular-sheen {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    background: radial-gradient(circle 220px at var(--specular-x, 50%) var(--specular-y, 50%), rgba(255, 255, 255, 0.12), transparent 70%);
+    transition: opacity 0.25s ease;
+}
+
+.marque-card-inner {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: space-between;
+    transform: translateZ(24px);
+    transform-style: preserve-3d;
+}
+
+.marque-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.marque-count-badge {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 2px 7px;
+    border-radius: 5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.marque-card-body {
+    margin: 8px 0 10px;
+}
+
+.marque-card-name {
+    font-family: var(--font-head);
+    font-size: 18px;
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: 0.08em;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.marque-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.marque-enter-cta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: #BDA794;
+    transition: all 0.2s ease;
+}
+
+.marque-enter-cta .cta-arrow {
+    font-size: 12px;
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.curator-marque-card:hover .marque-enter-cta {
+    color: #FFFFFF;
+}
+
+.curator-marque-card:hover .cta-arrow {
+    transform: translateX(5px);
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   STAGE 3: ALL FLEET GRAND PAVILION GALLERY (SCALABLE 100+ CARS)
+   ────────────────────────────────────────────────────────────────── */
+.showroom-pavilion-stage {
+    display: none;
+    flex-direction: column;
+    gap: 20px;
+    animation: fadeInPavilion 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.showroom-pavilion-stage.active {
+    display: flex;
+}
+
+@keyframes fadeInPavilion {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.pavilion-top-shelf {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    background: rgba(22, 19, 21, 0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(189, 167, 148, 0.25);
+    border-radius: 16px;
+    padding: 12px 20px;
+}
+
+.pavilion-title-group {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.pavilion-tag {
+    font-family: var(--font-mono);
+    font-size: 8.5px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: #BDA794;
+}
+
+.pavilion-heading {
+    font-family: var(--font-head);
+    font-size: 17px;
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: 0.1em;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.pavilion-count-pill {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    color: #BDA794;
+    background: rgba(189, 167, 148, 0.12);
+    border: 1px solid rgba(189, 167, 148, 0.28);
+    padding: 2px 9px;
+    border-radius: 999px;
+}
+
+/* All Fleet Pavilion Segregated Brand Sections */
+.pavilion-brands-container {
+    display: flex;
+    flex-direction: column;
+    padding-top: 8px;
+    padding-bottom: 120px;
+}
+
+.pavilion-brand-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 88px;
+}
+
+.pavilion-brand-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(189, 167, 148, 0.18);
+}
+
+.pavilion-brand-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.pavilion-brand-accent-line {
+    width: 3.5px;
+    height: 18px;
+    border-radius: 2px;
+    box-shadow: 0 0 8px currentColor;
+}
+
+.pavilion-brand-heading {
+    font-family: var(--font-head);
+    font-size: 16px;
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: 0.14em;
+}
+
+.pavilion-brand-badge {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    font-weight: 700;
+    color: #BDA794;
+    background: rgba(189, 167, 148, 0.1);
+    border: 1px solid rgba(189, 167, 148, 0.25);
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.pavilion-brand-turntable-btn {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(189, 167, 148, 0.22);
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 5px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.pavilion-brand-turntable-btn:hover {
+    background: rgba(189, 167, 148, 0.15);
+    color: #FFFFFF;
     border-color: rgba(189, 167, 148, 0.5);
-    background: #201E1F;
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5), 0 0 12px rgba(189, 167, 148, 0.1);
+    transform: translateX(-2px);
+}
+
+/* Symmetrical Museum Grid with Generous Breathing Room */
+.pavilion-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(205px, 1fr));
+    gap: 20px;
+}
+
+.pavilion-car-card {
+    position: relative;
+    background: linear-gradient(145deg, rgba(28, 24, 26, 0.85) 0%, rgba(16, 14, 15, 0.95) 100%);
+    border: 1px solid rgba(189, 167, 148, 0.18);
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+.pavilion-car-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(189, 167, 148, 0.5);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.65), 0 0 16px rgba(189, 167, 148, 0.12);
+}
+
+.pavilion-car-photo-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: #0E0C0D;
+}
+
+.pavilion-car-photo-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pavilion-car-card:hover .pavilion-car-photo-wrap img {
+    transform: scale(1.06);
+}
+
+.pavilion-card-badges {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    right: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: none;
+}
+
+.pavilion-scale-badge {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #FFFFFF;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 1px 5px;
+    border-radius: 3px;
+}
+
+.pavilion-fav-star {
+    color: #FBBF24;
+    font-size: 11px;
+    text-shadow: 0 0 6px rgba(251, 191, 36, 0.6);
+}
+
+.pavilion-car-info {
+    padding: 9px 11px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+    background: rgba(16, 14, 15, 0.6);
+}
+
+.pavilion-car-brand {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: #BDA794;
+}
+
+.pavilion-car-model {
+    font-family: var(--font-head);
+    font-size: 12px;
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: 0.04em;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.pavilion-car-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 6px;
+    font-family: var(--font-body);
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.45);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.pavilion-maker {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+/* Mobile-only elements hidden on desktop */
+.mobile-cockpit-hud {
+    display: none;
+}
+
+.pavilion-mobile-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pavilion-mobile-scale-pill,
+.pavilion-mobile-chevron {
+    display: none;
 }
 
 /* Background Hero Vignette Artwork - Disabled */
@@ -3471,14 +3762,14 @@ body.zen-mode .macos-dock-header {
 
     /* 1. Shell & Safe Area Spacing (Notch / Dynamic Island Protection) */
     .app-shell {
-        padding: max(22px, env(safe-area-inset-top, 22px)) 14px calc(96px + env(safe-area-inset-bottom, 16px));
+        padding: max(22px, env(safe-area-inset-top, 22px)) 14px calc(132px + env(safe-area-inset-bottom, 22px));
         gap: 14px;
     }
 
-    /* 2. Substantial, Ergonomic Floating Luxury Capsule Dock */
+    /* 2. Substantial, Ergonomic Floating Luxury Capsule Dock (Thicker & Lifted) */
     .macos-dock-header {
         position: fixed;
-        bottom: max(16px, env(safe-area-inset-bottom, 16px));
+        bottom: max(26px, calc(env(safe-area-inset-bottom, 0px) + 22px));
         left: 0;
         right: 0;
         width: 100%;
@@ -3495,15 +3786,16 @@ body.zen-mode .macos-dock-header {
         display: inline-flex;
         align-items: center;
         width: auto;
-        max-width: min(96vw, 390px);
+        max-width: calc(100vw - 20px);
         background: #BDA794;
-        border: 1.5px solid rgba(255, 255, 255, 0.7);
+        border: 2px solid rgba(255, 255, 255, 0.75);
         border-radius: 999px;
-        padding: 7px 14px;
-        gap: 6px;
-        box-shadow: 0 18px 46px rgba(0, 0, 0, 0.85), 0 2px 12px rgba(0, 0, 0, 0.35);
+        padding: 16px 16px;
+        gap: 5px;
+        box-shadow: 0 20px 48px rgba(0, 0, 0, 0.9), 0 2px 14px rgba(0, 0, 0, 0.45);
         transform: translateY(0);
         margin: 0 auto;
+        box-sizing: border-box;
     }
 
     .dock-app-brand,
@@ -3521,9 +3813,9 @@ body.zen-mode .macos-dock-header {
     .dock-item {
         padding: 0;
         border-radius: 50%;
-        width: 42px;
-        height: 42px;
-        min-width: 42px;
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
         flex: initial;
         display: flex;
         align-items: center;
@@ -3531,8 +3823,8 @@ body.zen-mode .macos-dock-header {
     }
 
     .dock-icon-box svg {
-        width: 22px;
-        height: 22px;
+        width: 20px;
+        height: 20px;
     }
 
     /* Hide text labels on phone for a compact, ergonomic floating capsule */
@@ -3543,13 +3835,14 @@ body.zen-mode .macos-dock-header {
     .dock-actions {
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 5px;
         margin-left: 3px;
     }
 
     .dock-action-btn {
         width: 38px;
         height: 38px;
+        min-width: 38px;
         border-radius: 50%;
         padding: 0;
         display: flex;
@@ -3565,6 +3858,7 @@ body.zen-mode .macos-dock-header {
     .dock-register-btn {
         width: 38px;
         height: 38px;
+        min-width: 38px;
         border-radius: 50%;
         padding: 0;
         display: flex;
@@ -3598,47 +3892,133 @@ body.zen-mode .macos-dock-header {
     }
 
     .canvas-gauges-wrapper {
-        height: 280px;
-        min-height: 280px;
+        display: none !important;
+    }
+
+    /* Mobile Minimalist Digital Telemetry HUD */
+    .mobile-cockpit-hud {
+        display: flex !important;
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+        margin-top: 8px;
+    }
+
+    .mobile-hud-primary {
+        background: linear-gradient(145deg, rgba(32, 28, 30, 0.85) 0%, rgba(18, 16, 17, 0.95) 100%);
+        border: 1px solid rgba(189, 167, 148, 0.28);
+        border-radius: 14px;
+        padding: 16px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    }
+
+    .mobile-hud-primary-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .mobile-hud-tag {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        color: #BDA794;
+    }
+
+    .mobile-hud-subtag {
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        color: rgba(255, 255, 255, 0.45);
+    }
+
+    .mobile-hud-primary-main {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+    }
+
+    .mobile-hud-big-num {
+        font-family: var(--font-head);
+        font-size: 40px;
+        font-weight: 800;
+        color: #FFFFFF;
+        line-height: 1;
+        letter-spacing: -0.02em;
+    }
+
+    .mobile-hud-max-denom {
+        font-family: var(--font-mono);
+        font-size: 14px;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.4);
+        letter-spacing: 0.05em;
+    }
+
+    .mobile-hud-bar-track {
+        width: 100%;
+        height: 5px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 999px;
         overflow: hidden;
     }
 
-    #clusterCanvas {
-        height: 280px;
+    .mobile-hud-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #BDA794 0%, #D8C7B8 100%);
+        border-radius: 999px;
+        box-shadow: 0 0 10px rgba(189, 167, 148, 0.6);
+        transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .mobile-hud-aux-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .mobile-hud-aux-card {
+        background: rgba(24, 21, 23, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 12px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .mobile-hud-aux-label {
+        font-family: var(--font-mono);
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        color: rgba(255, 255, 255, 0.45);
+    }
+
+    .mobile-hud-aux-val {
+        font-family: var(--font-head);
+        font-size: 22px;
+        font-weight: 800;
+        color: #FFFFFF;
+        line-height: 1.1;
     }
 
     .bento-heading {
         font-size: 15px;
     }
 
-    /* Mobile Binnacle Header: Vertically Stacked & Center Aligned */
+    /* Mobile Binnacle Header: Completely Hidden so card leads directly with the 3 data boxes */
     .cockpit-binnacle-card .bento-header {
-        flex-direction: column !important;
-        align-items: center !important;
-        text-align: center !important;
-        gap: 10px !important;
-        margin-bottom: 6px !important;
+        display: none !important;
     }
 
-    .cockpit-binnacle-card .bento-title-group {
-        align-items: center !important;
-        text-align: center !important;
-        gap: 4px !important;
-    }
-
-    .cockpit-binnacle-card .bento-tag {
-        text-align: center !important;
-    }
-
-    .cockpit-binnacle-card .bento-heading {
-        text-align: center !important;
-        font-size: 15.5px !important;
-    }
-
-    .cockpit-binnacle-card .cluster-controls-group {
-        justify-content: center !important;
-        width: 100% !important;
-        margin-top: 2px !important;
+    .cockpit-binnacle-card {
+        padding: 14px 14px 16px !important;
     }
 
     /* 4. Showroom Brand Curator Stage Mobile Polish */
@@ -3655,19 +4035,29 @@ body.zen-mode .macos-dock-header {
     .curator-hero-header {
         padding: 10px 10px 4px;
         gap: 6px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
     }
 
     .curator-tag-pill {
         font-size: 9px;
         padding: 3px 10px;
         letter-spacing: 0.12em;
+        text-align: center;
+        margin: 0 auto;
     }
 
     .curator-hero-title {
-        font-size: 17px;
-        letter-spacing: 0.08em;
-        line-height: 1.25;
-        text-align: center;
+        font-family: var(--font-head), 'Syncopate', sans-serif !important;
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.1em !important;
+        line-height: 1.3 !important;
+        text-transform: uppercase !important;
+        text-align: center !important;
+        margin: 0 auto;
     }
 
     .curator-toolbar {
@@ -3945,19 +4335,260 @@ body.zen-mode .macos-dock-header {
         display: none !important;
     }
 
-    /* 6. Showroom Marquee Grid Mobile Layout */
+    /* 6. Showroom Marquee Grid Mobile Layout: Strict 1 Marque Per Row with Generous Spacing */
+    #curatorMarqueGrid,
     .curator-marque-grid {
-        grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
-        gap: 8px;
+        display: flex !important;
+        flex-direction: column !important;
+        grid-template-columns: none !important;
+        gap: 16px !important;
+        width: 100% !important;
+        perspective: none !important;
     }
 
     .curator-marque-card {
-        padding: 10px 12px;
-        min-height: 105px;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 16px 20px !important;
+        min-height: 64px !important;
+        height: auto !important;
+        border-radius: 14px !important;
+        transform: none !important;
+        animation: none !important;
     }
 
-    .curator-marque-card .marque-name {
-        font-size: 13px;
+    .curator-marque-card .marque-card-inner {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        transform: none !important;
+        width: 100% !important;
+        gap: 12px !important;
+    }
+
+    .curator-marque-card .marque-card-body {
+        margin: 0 !important;
+        order: 1 !important;
+        flex: 1 !important;
+    }
+
+    .curator-marque-card .marque-card-name {
+        font-size: 15.5px !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.08em !important;
+    }
+
+    .curator-marque-card .marque-card-top {
+        order: 2 !important;
+        margin: 0 !important;
+    }
+
+    .curator-marque-card .marque-card-footer {
+        order: 3 !important;
+        padding-top: 0 !important;
+        border-top: none !important;
+        margin-left: 2px !important;
+    }
+
+    .curator-marque-card .marque-enter-cta span:first-child {
+        display: none !important;
+    }
+
+    .curator-marque-card .marque-enter-cta .cta-arrow {
+        font-size: 18px !important;
+        font-weight: 700 !important;
+        color: #BDA794 !important;
+    }
+
+    .curator-marque-card.curator-all-fleet-card .marque-enter-cta .cta-arrow {
+        color: #141214 !important;
+    }
+
+    /* 6b. All Fleet Grand Pavilion Gallery Mobile Polish: Roomy Header & Compact Spec Rows */
+    .pavilion-top-shelf {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        padding: 16px 18px !important;
+        border-radius: 14px !important;
+        gap: 14px !important;
+        margin-bottom: 18px !important;
+    }
+
+    .pavilion-top-shelf .btn-showroom-back {
+        align-self: flex-start;
+        padding: 6px 12px;
+        font-size: 9.5px;
+    }
+
+    .pavilion-title-group {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 6px !important;
+        width: 100% !important;
+    }
+
+    .pavilion-tag {
+        font-size: 9.5px !important;
+        letter-spacing: 0.16em !important;
+        color: #BDA794 !important;
+    }
+
+    .pavilion-heading {
+        font-family: var(--font-head), 'Syncopate', sans-serif !important;
+        font-size: 14px !important;
+        letter-spacing: 0.08em !important;
+        line-height: 1.25 !important;
+        color: #FFFFFF !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+    }
+
+    .pavilion-count-pill {
+        font-family: var(--font-mono), monospace !important;
+        font-size: 9.5px !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.08em !important;
+        padding: 2.5px 9px !important;
+        border-radius: 999px !important;
+        margin-left: auto;
+    }
+
+    /* Generous Vertical Spacing in between Marque Rows / Wings */
+    .pavilion-brand-section {
+        gap: 14px !important;
+        margin-bottom: 74px !important;
+        /* Expanded breathing room between Porsche, Dodge, etc. */
+    }
+
+    .pavilion-brand-header {
+        padding-bottom: 10px !important;
+        margin-bottom: 4px !important;
+    }
+
+    .pavilion-brand-heading {
+        font-size: 14.5px !important;
+        letter-spacing: 0.12em !important;
+    }
+
+    .pavilion-brand-turntable-btn {
+        padding: 5px 12px !important;
+        font-size: 9px !important;
+    }
+
+    /* Generous Vertical Spacing Between Cards */
+    .pavilion-grid {
+        display: flex !important;
+        flex-direction: column !important;
+        grid-template-columns: none !important;
+        gap: 14px !important;
+        /* Generous breathing room between individual cards */
+        width: 100% !important;
+    }
+
+    .pavilion-car-card {
+        width: 100% !important;
+        box-sizing: border-box !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        padding: 14px 18px !important;
+        min-height: 62px !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45) !important;
+        background: rgba(24, 20, 22, 0.9) !important;
+        border: 1px solid rgba(189, 167, 148, 0.2) !important;
+    }
+
+    .pavilion-car-card:hover {
+        transform: none !important;
+    }
+
+    /* Completely remove bulky photo on mobile */
+    .pavilion-car-photo-wrap {
+        display: none !important;
+    }
+
+    .pavilion-car-info {
+        background: transparent !important;
+        padding: 0 !important;
+        gap: 4px !important;
+        flex: 1 !important;
+    }
+
+    /* Universal Jura Font inside cards on mobile */
+    .pavilion-car-card,
+    .pavilion-car-card * {
+        font-family: 'Jura', sans-serif !important;
+    }
+
+    .pavilion-mobile-row {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+    }
+
+    .pavilion-mobile-scale-pill {
+        display: inline-block !important;
+        font-family: 'Jura', monospace !important;
+        font-size: 9.5px !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.06em !important;
+        color: #BDA794 !important;
+        background: rgba(189, 167, 148, 0.14) !important;
+        border: 1px solid rgba(189, 167, 148, 0.3) !important;
+        padding: 2px 7px !important;
+        border-radius: 4px !important;
+    }
+
+    .pavilion-car-brand {
+        font-family: 'Jura', sans-serif !important;
+        font-size: 9.5px !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.14em !important;
+        color: rgba(255, 255, 255, 0.5) !important;
+    }
+
+    .pavilion-car-model {
+        font-family: 'Jura', sans-serif !important;
+        font-size: 15.5px !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.04em !important;
+        line-height: 1.3 !important;
+        color: #FFFFFF !important;
+        display: block !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        max-width: 260px !important;
+        text-transform: none !important;
+    }
+
+    .pavilion-car-meta {
+        font-family: 'Jura', sans-serif !important;
+        padding-top: 0 !important;
+        border-top: none !important;
+        font-size: 10.5px !important;
+        color: rgba(255, 255, 255, 0.45) !important;
+    }
+
+    .pavilion-mobile-chevron {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 20px !important;
+        font-weight: 700 !important;
+        color: #BDA794 !important;
+        margin-left: 14px !important;
+        flex-shrink: 0 !important;
+    }
+
+    .pavilion-brands-container {
+        padding-bottom: 140px !important;
     }
 
     /* 6. Floating Modals, Dossier Cards, and Theme Studio on Mobile */
@@ -4281,31 +4912,41 @@ body.zen-mode .macos-dock-header {
 
 @media (max-width: 420px) {
     .app-shell {
-        padding: max(20px, env(safe-area-inset-top, 20px)) 10px calc(92px + env(safe-area-inset-bottom, 14px));
+        padding: max(20px, env(safe-area-inset-top, 20px)) 10px calc(128px + env(safe-area-inset-bottom, 20px));
     }
 
     .macos-dock {
-        max-width: min(96vw, 360px);
-        padding: 6px 10px;
-        gap: 5px;
+        max-width: calc(100vw - 16px);
+        padding: 14px 14px;
+        gap: 4.5px;
+    }
+
+    .dock-nav {
+        gap: 4.5px;
     }
 
     .dock-item {
         padding: 0;
-        width: 38px;
-        height: 38px;
-        min-width: 38px;
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
     }
 
     .dock-icon-box svg {
-        width: 20px;
-        height: 20px;
+        width: 19px;
+        height: 19px;
+    }
+
+    .dock-actions {
+        gap: 4.5px;
+        margin-left: 2px;
     }
 
     .dock-action-btn,
     .dock-register-btn {
         width: 36px;
         height: 36px;
+        min-width: 36px;
     }
 
     .dock-label {
@@ -4313,12 +4954,7 @@ body.zen-mode .macos-dock-header {
     }
 
     .canvas-gauges-wrapper {
-        height: 250px;
-        min-height: 250px;
-    }
-
-    #clusterCanvas {
-        height: 250px;
+        display: none !important;
     }
 
     .carousel-ring-container {

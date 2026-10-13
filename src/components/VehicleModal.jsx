@@ -37,7 +37,7 @@ export default function VehicleModal({
             setPhotoUrl(cdnUrl);
         } catch (err) {
             console.error('Upload failed:', err);
-            setUploadError('Upload failed. Check Supabase storage settings.');
+            setUploadError(err.message || 'Upload failed. Check Supabase storage settings.');
         } finally {
             setIsUploading(false);
         }
@@ -91,6 +91,8 @@ export default function VehicleModal({
     const scaleOptions = [
         { value: '1:18', label: '1:18 (Heavyweight Display)' },
         { value: '1:24', label: '1:24 (Street Scale)' },
+        { value: '1:32', label: '1:32 (Precision & Slot Display)' },
+        { value: '1:40', label: '1:40 (Heritage & Solido Scale)' },
         { value: '1:43', label: '1:43 (Collector Showcase)' },
         { value: '1:64', label: '1:64 (Kaido / Mini GT / HW)' },
         { value: '1:12', label: '1:12 (Flagship Scale)' },

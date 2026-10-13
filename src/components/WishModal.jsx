@@ -38,9 +38,11 @@ export default function WishModal({
 
     const scaleOptions = [
         { value: '1:18', label: '1:18' },
+        { value: '1:24', label: '1:24' },
+        { value: '1:32', label: '1:32' },
+        { value: '1:40', label: '1:40' },
         { value: '1:43', label: '1:43' },
-        { value: '1:64', label: '1:64' },
-        { value: '1:24', label: '1:24' }
+        { value: '1:64', label: '1:64' }
     ];
 
     const priorityOptions = [

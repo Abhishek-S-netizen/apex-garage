@@ -264,15 +264,17 @@ export default function App() {
         saveAndSyncData({ ...apexData, makers: apexData.makers.filter(m => m !== makerName) });
     };
 
-    // Export JSON
+    // Export JSON (Owner Protected)
     const handleExportJSON = () => {
-        const blob = new Blob([JSON.stringify(apexData, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `APEX_Fleet_Backup_${new Date().toISOString().substring(0, 10)}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
+        requireOwner(() => {
+            const blob = new Blob([JSON.stringify(apexData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `APEX_Fleet_Backup_${new Date().toISOString().substring(0, 10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
     };
 
     const activeDossierCar = apexData.fleet.find(c => c.id === dossierCarId);
@@ -448,6 +450,7 @@ export default function App() {
                 resetTheme={handleResetTheme}
                 apexData={apexData}
                 onImportData={(data) => requireOwner(() => saveAndSyncData(data))}
+                onExportBackup={handleExportJSON}
             />
 
             <AuthModal

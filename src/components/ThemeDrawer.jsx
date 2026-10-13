@@ -8,7 +8,8 @@ export default function ThemeDrawer({
     updateTheme,
     resetTheme,
     apexData = null,
-    onImportData = () => {}
+    onImportData = () => { },
+    onExportBackup = null
 }) {
     const currentAccent = (themeState.autoAdapt
         ? '#9F3E3E'
@@ -16,6 +17,10 @@ export default function ThemeDrawer({
     ).toUpperCase();
 
     const handleExportBackup = () => {
+        if (onExportBackup) {
+            onExportBackup();
+            return;
+        }
         if (!apexData) return;
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(apexData, null, 2));
         const downloadAnchor = document.createElement('a');
