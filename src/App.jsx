@@ -1,6 +1,17 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { DEFAULT_APEX_DATA } from './data/initialData.js';
 import { useApexTheme } from './theme/themeEngine.js';
+import {
+    isFileAccessSupported,
+    getStoredHandle,
+    storeHandle,
+    clearStoredHandle,
+    ensurePermission,
+    readGarageFile,
+    writeGarageFile,
+    pickNewGarageFile,
+    pickExistingGarageFile
+} from './data/garageFile.js';
 
 import MacDock from './components/MacDock.jsx';
 import Showroom from './components/Showroom.jsx';
@@ -59,29 +70,67 @@ export default function App() {
     const [isDossierOpen, setIsDossierOpen] = useState(false);
     const [dossierCarId, setDossierCarId] = useState(null);
 
-    // Save directly to physical cars.json on laptop disk
+    // ── Linked Garage File (real cars.json on laptop disk) ──
+    // status: 'checking' | 'unsupported' | 'unlinked' | 'needs-permission' | 'linked' | 'error'
+    const [garageFile, setGarageFile] = useState({
+        status: isFileAccessSupported ? 'checking' : 'unsupported',
+        name: null,
+        error: null
+    });
+    const [isFileBannerDismissed, setIsFileBannerDismissed] = useState(false);
+    const fileHandleRef = useRef(null);
+    const writeQueueRef = useRef(Promise.resolve());
+    const apexDataRef = useRef(apexData);
+    useEffect(() => { apexDataRef.current = apexData; }, [apexData]);
+
+    // Turn raw file contents into clean app data
+    const normalizeData = (raw) => {
+        const rawFleet = Array.isArray(raw) ? raw : (raw?.fleet || []);
+        const fleet = rawFleet.map((c, i) => sanitizeCar(c, i)).filter(Boolean);
+        const brands = Array.from(new Set([...(raw?.brands || []), ...fleet.map(c => c.brand)].filter(Boolean)));
+        const makers = Array.from(new Set([...(raw?.makers || []), ...fleet.map(c => c.maker)].filter(Boolean)));
+        return { fleet, brands, makers };
+    };
+
+    const applyData = (cleanData) => {
+        setApexData(cleanData);
+        try {
+            localStorage.setItem('apex_suite_data', JSON.stringify(cleanData));
+        } catch (e) { }
+    };
+
+    // Queue writes so rapid edits never overlap on disk
+    const writeToLinkedFile = useCallback((data) => {
+        const handle = fileHandleRef.current;
+        if (!handle) return;
+        writeQueueRef.current = writeQueueRef.current
+            .then(() => writeGarageFile(handle, data))
+            .then(() => setGarageFile(s => ({ ...s, status: 'linked', error: null })))
+            .catch((err) => {
+                console.error('[APEX Garage File] Write failed:', err);
+                setGarageFile(s => ({ ...s, status: 'error', error: err.message }));
+            });
+    }, []);
+
+    // Save: linked cars.json on disk (master) + browser mirror (safety net)
     const saveAndSyncData = useCallback((newData) => {
         const cleanFleet = (newData.fleet || []).map((c, i) => sanitizeCar(c, i)).filter(Boolean);
         const cleanData = {
             ...newData,
             fleet: cleanFleet
         };
-        setApexData(cleanData);
+        applyData(cleanData);
+        writeToLinkedFile(cleanData);
 
-        // 1. Master: Save directly to laptop disk cars.json via local Node/Vite server
-        fetch('/api/data', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(cleanData)
-        }).catch((err) => {
-            console.warn('[APEX Disk Sync] Local server not reachable; mirrored locally.');
-        });
-
-        // 2. Mirror: Silent local safety net in browser storage
-        try {
-            localStorage.setItem('apex_suite_data', JSON.stringify(cleanData));
-        } catch (e) { }
-    }, []);
+        // Local dev only: Vite middleware also mirrors to the project's cars.json
+        if (import.meta.env.DEV) {
+            fetch('/api/data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(cleanData)
+            }).catch(() => { });
+        }
+    }, [writeToLinkedFile]);
 
     const handleUpdateTheme = useCallback((updates) => {
         updateTheme(updates);
@@ -91,43 +140,117 @@ export default function App() {
         resetTheme();
     }, [resetTheme]);
 
-    // Initial load & automatic disk migration
-    useEffect(() => {
-        fetch('/api/data', { cache: 'no-cache' })
-            .then(res => {
-                if (res.ok) return res.json();
-                throw new Error('Offline');
-            })
-            .then(diskData => {
-                const diskFleetCount = (diskData && Array.isArray(diskData.fleet)) ? diskData.fleet.length : 0;
-                const localFleetCount = (apexData && Array.isArray(apexData.fleet)) ? apexData.fleet.length : 0;
+    // Read the linked file into the app (or seed it if it's brand new / empty)
+    const loadFromLinkedFile = async (handle) => {
+        const raw = await readGarageFile(handle);
+        const hasCars = raw && (Array.isArray(raw) || Array.isArray(raw.fleet));
+        if (hasCars) {
+            applyData(normalizeData(raw));
+        } else {
+            await writeGarageFile(handle, apexDataRef.current);
+        }
+    };
 
-                // Case A: Browser has more cars than disk (e.g. 109 cars in browser, 3 on disk)
-                // Automatically migrate the 109 cars to cars.json on disk!
-                if (localFleetCount > diskFleetCount) {
-                    const cleanData = {
-                        ...apexData,
-                        fleet: apexData.fleet.map((c, i) => sanitizeCar(c, i)).filter(Boolean)
-                    };
-                    fetch('/api/data', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(cleanData)
-                    }).catch(() => { });
+    // Startup: reconnect to the previously linked cars.json
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            if (!isFileAccessSupported) return;
+            const handle = await getStoredHandle();
+            if (cancelled) return;
+            if (!handle) {
+                setGarageFile({ status: 'unlinked', name: null, error: null });
+                return;
+            }
+            fileHandleRef.current = handle;
+            try {
+                if (await ensurePermission(handle, false)) {
+                    await loadFromLinkedFile(handle);
+                    if (!cancelled) setGarageFile({ status: 'linked', name: handle.name, error: null });
+                } else if (!cancelled) {
+                    // Browser needs one click to re-allow access this session
+                    setGarageFile({ status: 'needs-permission', name: handle.name, error: null });
                 }
-                // Case B: Disk file is the master and has our cars
-                else if (diskFleetCount > 0) {
-                    const cleanFleet = diskData.fleet.map((c, i) => sanitizeCar(c, i)).filter(Boolean);
-                    const cleanData = { ...diskData, fleet: cleanFleet };
-                    setApexData(cleanData);
-                    try {
-                        localStorage.setItem('apex_suite_data', JSON.stringify(cleanData));
-                    } catch (e) { }
+            } catch (err) {
+                if (!cancelled) setGarageFile({ status: 'error', name: handle.name, error: err.message });
+            }
+        })();
+        return () => { cancelled = true; };
+    }, []);
+
+    const isPickerCancel = (err) => err && err.name === 'AbortError';
+
+    // Create a new cars.json and write the current garage into it
+    const handleCreateGarageFile = async () => {
+        try {
+            const handle = await pickNewGarageFile();
+            await writeGarageFile(handle, apexDataRef.current);
+            await storeHandle(handle);
+            fileHandleRef.current = handle;
+            setGarageFile({ status: 'linked', name: handle.name, error: null });
+        } catch (err) {
+            if (!isPickerCancel(err)) alert(`Could not create the garage file: ${err.message}`);
+        }
+    };
+
+    // Link an existing cars.json and load its cars
+    const handleOpenGarageFile = async () => {
+        try {
+            const handle = await pickExistingGarageFile();
+            if (!(await ensurePermission(handle, true))) {
+                alert('Permission to edit the file was not granted.');
+                return;
+            }
+            const raw = await readGarageFile(handle);
+            const incoming = raw ? normalizeData(raw) : null;
+            if (incoming && incoming.fleet.length > 0) {
+                if (!window.confirm(`Load ${incoming.fleet.length} vehicles from "${handle.name}"? This replaces the cars currently shown in the app.`)) return;
+                applyData(incoming);
+            } else {
+                // Empty file: seed it with the current garage
+                await writeGarageFile(handle, apexDataRef.current);
+            }
+            await storeHandle(handle);
+            fileHandleRef.current = handle;
+            setGarageFile({ status: 'linked', name: handle.name, error: null });
+        } catch (err) {
+            if (!isPickerCancel(err)) alert(`Could not open the garage file: ${err.message}`);
+        }
+    };
+
+    // Re-allow access after reopening the app (needs a click)
+    const handleReconnectGarageFile = async () => {
+        const handle = fileHandleRef.current;
+        if (!handle) return handleOpenGarageFile();
+        try {
+            if (await ensurePermission(handle, true)) {
+                await loadFromLinkedFile(handle);
+                setGarageFile({ status: 'linked', name: handle.name, error: null });
+            }
+        } catch (err) {
+            setGarageFile({ status: 'error', name: handle.name, error: err.message });
+        }
+    };
+
+    const handleUnlinkGarageFile = async () => {
+        if (!window.confirm('Stop saving to this file? Your file on disk is kept; the app just stops writing to it.')) return;
+        await clearStoredHandle().catch(() => { });
+        fileHandleRef.current = null;
+        setGarageFile({ status: 'unlinked', name: null, error: null });
+    };
+
+    // Local dev only: load the project's cars.json via Vite middleware (read-only on startup)
+    useEffect(() => {
+        if (!import.meta.env.DEV) return;
+        fetch('/api/data', { cache: 'no-cache' })
+            .then(res => (res.ok ? res.json() : null))
+            .then(diskData => {
+                if (fileHandleRef.current) return; // linked file wins
+                if (diskData && Array.isArray(diskData.fleet) && diskData.fleet.length > 0) {
+                    applyData(normalizeData(diskData));
                 }
             })
-            .catch(() => {
-                // If local server is offline, browser state serves seamlessly
-            });
+            .catch(() => { });
     }, []);
 
     // Global keyboard shortcuts
@@ -277,7 +400,9 @@ export default function App() {
             };
 
             saveAndSyncData(newCleanData);
-            alert(`Successfully restored ${cleanFleet.length} vehicles!`);
+            alert(fileHandleRef.current
+                ? `Successfully restored ${cleanFleet.length} vehicles and saved them to ${fileHandleRef.current.name}.`
+                : `Successfully restored ${cleanFleet.length} vehicles. Tip: link a cars.json file in Studio so they're saved to your disk.`);
         };
 
         if (fileOrData instanceof File || fileOrData instanceof Blob) {
@@ -322,6 +447,28 @@ export default function App() {
         <>
             {/* Atelier Ambient Warm Gradient Backdrop (#BDA794 to #1A1819) */}
             <div className="atelier-gradient-backdrop" id="atelierBackdrop" />
+
+            {/* Garage File status banner (only when action is needed) */}
+            {(garageFile.status === 'needs-permission' ||
+                garageFile.status === 'error' ||
+                (garageFile.status === 'unlinked' && !isFileBannerDismissed)) && (
+                <div className={`garage-file-banner ${garageFile.status === 'error' ? 'is-error' : ''}`} role="status">
+                    <span className="garage-file-banner-text">
+                        {garageFile.status === 'needs-permission' && <>Click to reconnect <strong>{garageFile.name}</strong> so changes save to your disk.</>}
+                        {garageFile.status === 'error' && <>Couldn't save to <strong>{garageFile.name}</strong>. Reconnect the file to keep saving.</>}
+                        {garageFile.status === 'unlinked' && <>Your garage isn't saved to a file on your laptop yet.</>}
+                    </span>
+                    {garageFile.status === 'unlinked' ? (
+                        <>
+                            <button type="button" className="garage-file-banner-btn" onClick={handleCreateGarageFile}>Create cars.json</button>
+                            <button type="button" className="garage-file-banner-btn is-ghost" onClick={handleOpenGarageFile}>Open existing</button>
+                            <button type="button" className="garage-file-banner-close" onClick={() => setIsFileBannerDismissed(true)} title="Dismiss">✕</button>
+                        </>
+                    ) : (
+                        <button type="button" className="garage-file-banner-btn" onClick={handleReconnectGarageFile}>Reconnect</button>
+                    )}
+                </div>
+            )}
             <div className="ambient-warmth-orb orb-top" />
             <div className="ambient-warmth-orb orb-bottom" />
 
@@ -419,6 +566,11 @@ export default function App() {
                 onExportBackup={handleExportJSON}
                 onImportData={handleImportJSON}
                 apexData={apexData}
+                garageFile={garageFile}
+                onCreateGarageFile={handleCreateGarageFile}
+                onOpenGarageFile={handleOpenGarageFile}
+                onReconnectGarageFile={handleReconnectGarageFile}
+                onUnlinkGarageFile={handleUnlinkGarageFile}
             />
         </>
     );

@@ -10,11 +10,16 @@ export default function ThemeDrawer({
     resetTheme: propResetTheme,
     onResetTheme,
     apexData = null,
-    onImportData = () => { },
-    onExportBackup = null
+    onImportData = () => {},
+    onExportBackup = null,
+    garageFile = { status: 'unsupported', name: null },
+    onCreateGarageFile = () => {},
+    onOpenGarageFile = () => {},
+    onReconnectGarageFile = () => {},
+    onUnlinkGarageFile = () => {}
 }) {
-    const updateTheme = propUpdateTheme || onUpdateTheme || (() => { });
-    const resetTheme = propResetTheme || onResetTheme || (() => { });
+    const updateTheme = propUpdateTheme || onUpdateTheme || (() => {});
+    const resetTheme = propResetTheme || onResetTheme || (() => {});
     const fileInputRef = useRef(null);
 
     const currentAccent = (themeState.autoAdapt
@@ -186,9 +191,57 @@ export default function ThemeDrawer({
                     {/* Section 3: Fleet Persistence & Disk Backup */}
                     <div className="drawer-section">
                         <span className="drawer-section-label">FLEET TELEMETRY & DISK BACKUP</span>
+
+                        {/* Linked cars.json on laptop disk */}
+                        <div className="drawer-backup-card">
+                            <div className="garage-file-status-row">
+                                <span className={`garage-file-dot status-${garageFile.status}`} />
+                                <span className="garage-file-status-text">
+                                    {garageFile.status === 'linked' && <>Saving to <strong>{garageFile.name}</strong></>}
+                                    {garageFile.status === 'needs-permission' && <><strong>{garageFile.name}</strong> needs reconnecting</>}
+                                    {garageFile.status === 'error' && <>Can't write to <strong>{garageFile.name}</strong></>}
+                                    {garageFile.status === 'unlinked' && <>No file linked. Changes stay in this browser only.</>}
+                                    {garageFile.status === 'checking' && <>Checking linked file…</>}
+                                    {garageFile.status === 'unsupported' && <>Saving to a disk file needs Chrome or Edge on desktop.</>}
+                                </span>
+                            </div>
+
+                            {garageFile.status === 'unlinked' && (
+                                <div className="drawer-backup-row">
+                                    <button type="button" className="btn-backup" onClick={onCreateGarageFile} title="Create a new cars.json and save your garage into it">
+                                        <span>Create cars.json</span>
+                                    </button>
+                                    <button type="button" className="btn-backup" onClick={onOpenGarageFile} title="Link an existing cars.json and load its cars">
+                                        <span>Open existing</span>
+                                    </button>
+                                </div>
+                            )}
+
+                            {(garageFile.status === 'needs-permission' || garageFile.status === 'error') && (
+                                <div className="drawer-backup-row">
+                                    <button type="button" className="btn-backup" onClick={onReconnectGarageFile}>
+                                        <span>Reconnect</span>
+                                    </button>
+                                    <button type="button" className="btn-backup" onClick={onUnlinkGarageFile}>
+                                        <span>Unlink</span>
+                                    </button>
+                                </div>
+                            )}
+
+                            {garageFile.status === 'linked' && (
+                                <div className="drawer-backup-row">
+                                    <button type="button" className="btn-backup" onClick={onOpenGarageFile} title="Switch to a different cars.json">
+                                        <span>Switch file</span>
+                                    </button>
+                                    <button type="button" className="btn-backup" onClick={onUnlinkGarageFile}>
+                                        <span>Unlink</span>
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                         <div className="drawer-backup-card">
                             <span className="drawer-backup-hint">
-                                Auto-syncs directly to physical cars.json on disk. Export or restore offline backups anytime.
+                                Download a one-off backup copy, or restore cars from a backup JSON.
                             </span>
                             <div className="drawer-backup-row">
                                 <button
