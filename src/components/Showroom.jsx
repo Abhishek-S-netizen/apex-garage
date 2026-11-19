@@ -79,8 +79,11 @@ export default function Showroom({
                 <div className="garage-header">
                     <div className="curator-tag-pill">PRIVATE ATELIER SHOWCASE</div>
                     <div className="garage-title-row">
-                        <h2 className="curator-hero-title">THE SHOWROOM</h2>
-                        <span className="garage-total-badge">{fleet.length} {fleet.length === 1 ? 'MODEL' : 'MODELS'}</span>
+                        <h2 className="curator-hero-title">
+                            <span>THE SHOWROOM</span>
+                            <span className="title-dot-sep">·</span>
+                            <span className="title-count-val">{fleet.length}</span>
+                        </h2>
                     </div>
                 </div>
 
