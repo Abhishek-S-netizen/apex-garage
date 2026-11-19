@@ -856,25 +856,14 @@ body {
     border-radius: 999px;
 }
 
-/* Minimalist Horizontal Marque Filter Bar */
+/* Marque Filter Bar: Clean Wrapping on Desktop, Horizontal Swipe on Mobile */
 .garage-marque-pills-bar {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 8px;
-    overflow-x: auto;
-    padding: 4px 2px 16px;
+    padding: 4px 0 10px;
     margin-top: -6px;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(189, 167, 148, 0.2) transparent;
-}
-
-.garage-marque-pills-bar::-webkit-scrollbar {
-    height: 4px;
-}
-
-.garage-marque-pills-bar::-webkit-scrollbar-thumb {
-    background: rgba(189, 167, 148, 0.25);
-    border-radius: 999px;
 }
 
 .garage-marque-pill {
@@ -4459,6 +4448,18 @@ body.zen-mode .macos-dock-header {
         font-size: 10px;
         border-radius: 8px;
         flex-shrink: 0;
+    }
+
+    .garage-marque-pills-bar {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 8px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .garage-marque-pills-bar::-webkit-scrollbar {
+        display: none;
     }
 
     /* All Fleet Showcase Mobile Card Polish */
