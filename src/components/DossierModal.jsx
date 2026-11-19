@@ -16,13 +16,22 @@ export default function DossierModal({
                 <button className="modal-close-btn" onClick={onClose} type="button">✕</button>
 
                 <div className="dossier-layout">
-                    {/* Left: Hero Image & Badges */}
+                    {/* Left: Hero Image or Precision Chassis Plaque */}
                     <div className="dossier-hero-col">
                         <div className="dossier-hero-wrap">
-                            <img
-                                src={car.photoUrl || 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?q=80&w=1200&auto=format&fit=crop'}
-                                alt={car.model}
-                            />
+                            {car.photoUrl ? (
+                                <img
+                                    src={car.photoUrl}
+                                    alt={car.model}
+                                />
+                            ) : (
+                                <div className="dossier-spec-plaque">
+                                    <span className="dossier-plaque-marque">{(car.brand || 'ATELIER').toUpperCase()}</span>
+                                    <h3 className="dossier-plaque-title">{car.model}</h3>
+                                    <span className="dossier-plaque-maker">{car.maker || 'PRECISION DIECAST'}</span>
+                                    <span className="dossier-plaque-scale">{car.scale || '1:18'}</span>
+                                </div>
+                            )}
                             <div className="dossier-hero-badges">
                                 <span className="dossier-scale-pill">{car.scale || '1:18'}</span>
                             </div>

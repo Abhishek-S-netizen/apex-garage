@@ -17,6 +17,7 @@ export default function VehicleModal({
     const [year, setYear] = useState('');
     const [isFavorite, setIsFavorite] = useState(false);
     const [photoUrl, setPhotoUrl] = useState('');
+    const [showPhotoSection, setShowPhotoSection] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [uploadError, setUploadError] = useState('');
     const fileInputRef = useRef(null);
@@ -52,6 +53,7 @@ export default function VehicleModal({
             setYear(editCar.year || '');
             setIsFavorite(!!editCar.isFavorite);
             setPhotoUrl(editCar.photoUrl || '');
+            setShowPhotoSection(Boolean(editCar.photoUrl));
         } else {
             setModel('');
             setBrand(brands[0] || 'Porsche');
@@ -60,6 +62,7 @@ export default function VehicleModal({
             setYear('');
             setIsFavorite(false);
             setPhotoUrl('');
+            setShowPhotoSection(false);
         }
     }, [editCar, brands, makers, isOpen]);
 
@@ -75,7 +78,7 @@ export default function VehicleModal({
             scale,
             year: Number(year) || null,
             isFavorite,
-            photoUrl: photoUrl.trim() || 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?q=80&w=1200&auto=format&fit=crop',
+            photoUrl: photoUrl.trim() || '',
             livery: editCar?.livery || '',
             condition: editCar?.condition || 'Mint in Box',
             purchasePrice: editCar?.purchasePrice || 0,
@@ -189,58 +192,102 @@ export default function VehicleModal({
                         </div>
                     </div>
 
-                    {/* Section 2: High-Res Photograph */}
-                    <div className="apple-form-section">
-                        <div className="apple-section-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <span className="apple-section-title">PHOTOGRAPHY & MEDIA URL</span>
+                    {/* Section 2: Optional Photograph (Collapsed by default for rapid registration) */}
+                    <div className="apple-form-section" style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '14px' }}>
+                        {!showPhotoSection ? (
                             <button
                                 type="button"
-                                className="apple-upload-trigger-btn"
-                                onClick={() => fileInputRef.current?.click()}
-                                disabled={isUploading}
-                                title="Upload from camera roll or take photo"
+                                className="apple-optional-toggle-btn"
+                                onClick={() => setShowPhotoSection(true)}
+                                style={{
+                                    width: '100%',
+                                    padding: '10px 14px',
+                                    borderRadius: '10px',
+                                    background: 'rgba(255, 255, 255, 0.03)',
+                                    border: '1px dashed var(--border-subtle)',
+                                    color: 'var(--text-tertiary)',
+                                    fontSize: '11px',
+                                    fontFamily: 'Plus Jakarta Sans, sans-serif',
+                                    letterSpacing: '0.04em',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '8px',
+                                    transition: 'all 0.2s ease'
+                                }}
                             >
-                                {isUploading ? 'Uploading...' : ' Upload / Camera'}
+                                <span>📷</span>
+                                <span>+ Add Photo / Media (Optional)</span>
                             </button>
-                            <input
-                                ref={fileInputRef}
-                                type="file"
-                                accept="image/*"
-                                style={{ display: 'none' }}
-                                onChange={handleFileUpload}
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <input
-                                type="url"
-                                className="form-input apple-input"
-                                placeholder="Paste image URL, or tap 'Upload / Camera' above..."
-                                value={photoUrl}
-                                onChange={(e) => setPhotoUrl(e.target.value)}
-                            />
-
-                            {uploadError && (
-                                <p style={{ fontSize: '11px', color: 'var(--accent-bright)', marginTop: '2px' }}>
-                                    {uploadError}
-                                </p>
-                            )}
-
-                            <div className="photo-preview-box apple-photo-preview" style={{ marginTop: '10px' }}>
-                                {photoUrl ? (
-                                    <img
-                                        src={photoUrl}
-                                        alt="Vehicle Preview"
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                        onError={(e) => { e.target.style.display = 'none'; }}
-                                    />
-                                ) : (
-                                    <div className="photo-preview-placeholder">
-                                        <span>Enter a valid image URL to preview vehicle showcase</span>
+                        ) : (
+                            <>
+                                <div className="apple-section-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <span className="apple-section-title">PHOTOGRAPHY & MEDIA URL (OPTIONAL)</span>
+                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                        <button
+                                            type="button"
+                                            className="apple-upload-trigger-btn"
+                                            onClick={() => fileInputRef.current?.click()}
+                                            disabled={isUploading}
+                                            title="Upload from camera roll or take photo"
+                                        >
+                                            {isUploading ? 'Uploading...' : 'Upload / Camera'}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setShowPhotoSection(false);
+                                                setPhotoUrl('');
+                                            }}
+                                            style={{
+                                                background: 'none',
+                                                border: 'none',
+                                                color: 'var(--text-tertiary)',
+                                                fontSize: '11px',
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                            Hide
+                                        </button>
                                     </div>
-                                )}
-                            </div>
-                        </div>
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept="image/*"
+                                        style={{ display: 'none' }}
+                                        onChange={handleFileUpload}
+                                    />
+                                </div>
+
+                                <div className="form-group" style={{ marginTop: '8px' }}>
+                                    <input
+                                        type="url"
+                                        className="form-input apple-input"
+                                        placeholder="Paste image URL, or tap 'Upload / Camera'..."
+                                        value={photoUrl}
+                                        onChange={(e) => setPhotoUrl(e.target.value)}
+                                    />
+
+                                    {uploadError && (
+                                        <p style={{ fontSize: '11px', color: 'var(--accent-bright)', marginTop: '2px' }}>
+                                            {uploadError}
+                                        </p>
+                                    )}
+
+                                    {photoUrl && (
+                                        <div className="photo-preview-box apple-photo-preview" style={{ marginTop: '10px' }}>
+                                            <img
+                                                src={photoUrl}
+                                                alt="Vehicle Preview"
+                                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                onError={(e) => { e.target.style.display = 'none'; }}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            </>
+                        )}
                     </div>
 
                     <div className="modal-actions apple-modal-actions">

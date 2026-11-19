@@ -1,70 +1,54 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { DEFAULT_APEX_DATA } from './data/initialData.js';
 import { useApexTheme } from './theme/themeEngine.js';
-import {
-    fetchRemoteGarage,
-    saveRemoteGarage,
-    isSupabaseConfigured,
-    getStoredSession,
-    validateCurrentSession,
-    signOutOwner
-} from './lib/supabase.js';
 
 import MacDock from './components/MacDock.jsx';
-import Cockpit from './components/Cockpit.jsx';
 import Showroom from './components/Showroom.jsx';
 import Registry from './components/Registry.jsx';
-import PegHunt from './components/PegHunt.jsx';
 import Libraries from './components/Libraries.jsx';
 import ThemeDrawer from './components/ThemeDrawer.jsx';
 import VehicleModal from './components/VehicleModal.jsx';
 import DossierModal from './components/DossierModal.jsx';
-import WishModal from './components/WishModal.jsx';
-import AuthModal from './components/AuthModal.jsx';
+
+// Core Schema Sanitizer (Strips dead CRM fields, keeps only essential telemetry)
+export function sanitizeCar(car, index = 0) {
+    if (!car) return null;
+    return {
+        id: String(car.id || `apex_car_${Date.now()}_${index}`),
+        brand: (car.brand || 'Bespoke').trim(),
+        model: (car.model || 'Unknown Model').trim(),
+        maker: (car.maker || '—').trim(),
+        scale: car.scale || '1:64',
+        year: car.year ? Number(car.year) : null,
+        isFavorite: Boolean(car.isFavorite)
+    };
+}
 
 export default function App() {
     // Theme Engine
     const { themeState, tokens, updateTheme, resetTheme } = useApexTheme();
 
-    // Owner Security & Session State
-    const [ownerSession, setOwnerSession] = useState(() => getStoredSession());
-    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-    const isOwnerLoggedIn = Boolean(ownerSession && ownerSession.access_token);
-
-    // Validate active session in background on load
-    useEffect(() => {
-        validateCurrentSession().then(validated => {
-            setOwnerSession(validated);
-        });
-    }, []);
-
-    const handleSignOut = async () => {
-        await signOutOwner();
-        setOwnerSession(null);
-    };
-
-    // Owner Guard: Prompts AuthModal if in Viewer Mode
-    const requireOwner = useCallback((actionFn) => {
-        if (isOwnerLoggedIn) {
-            actionFn();
-        } else {
-            setIsAuthModalOpen(true);
-        }
-    }, [isOwnerLoggedIn]);
-
-    // Collection State
+    // Collection State (Stored strictly on laptop disk / browser storage)
     const [apexData, setApexData] = useState(() => {
         try {
             const saved = localStorage.getItem('apex_suite_data');
             if (saved !== null) {
                 const parsed = JSON.parse(saved);
-                if (parsed && Array.isArray(parsed.fleet)) return parsed;
+                if (parsed && Array.isArray(parsed.fleet)) {
+                    return {
+                        ...parsed,
+                        fleet: parsed.fleet.map((c, i) => sanitizeCar(c, i)).filter(Boolean)
+                    };
+                }
             }
         } catch (e) { }
-        return DEFAULT_APEX_DATA;
+        return {
+            ...DEFAULT_APEX_DATA,
+            fleet: DEFAULT_APEX_DATA.fleet.map((c, i) => sanitizeCar(c, i)).filter(Boolean)
+        };
     });
 
-    const [activeView, setActiveView] = useState('cockpit');
+    const [activeView, setActiveView] = useState('showroom');
     const [isZenMode, setIsZenMode] = useState(false);
     const [isStudioOpen, setIsStudioOpen] = useState(false);
 
@@ -75,77 +59,52 @@ export default function App() {
     const [isDossierOpen, setIsDossierOpen] = useState(false);
     const [dossierCarId, setDossierCarId] = useState(null);
 
-    const [isWishModalOpen, setIsWishModalOpen] = useState(false);
-
-    // Save and sync helper (Cloud + LocalStorage + Theme)
+    // Save strictly to local laptop storage
     const saveAndSyncData = useCallback((newData) => {
-        setApexData(newData);
+        const cleanFleet = (newData.fleet || []).map((c, i) => sanitizeCar(c, i)).filter(Boolean);
+        const cleanData = {
+            ...newData,
+            fleet: cleanFleet
+        };
+        setApexData(cleanData);
         try {
-            localStorage.setItem('apex_suite_data', JSON.stringify(newData));
+            localStorage.setItem('apex_suite_data', JSON.stringify(cleanData));
         } catch (e) { }
 
-        // Sync to Supabase Cloud if configured (including active theme)
-        if (isSupabaseConfigured()) {
-            saveRemoteGarage({ ...newData, theme: themeState });
-        }
-
-        // Optional local dev server fallback
+        // Optional local dev server sync to cars.json
         fetch('/api/data', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newData)
+            body: JSON.stringify(cleanData)
         }).catch(() => { });
-    }, [themeState]);
+    }, []);
 
-    // Handle theme updates and sync with Supabase
     const handleUpdateTheme = useCallback((updates) => {
         updateTheme(updates);
-        if (isSupabaseConfigured()) {
-            const updatedTheme = { ...themeState, ...updates };
-            saveRemoteGarage({ ...apexData, theme: updatedTheme });
-        }
-    }, [updateTheme, themeState, apexData]);
+    }, [updateTheme]);
 
     const handleResetTheme = useCallback(() => {
         resetTheme();
-        if (isSupabaseConfigured()) {
-            saveRemoteGarage({ ...apexData, theme: null });
-        }
-    }, [resetTheme, apexData]);
+    }, [resetTheme]);
 
-    // Initial load: Fetch from Supabase Cloud (or local server fallback)
+    // Initial load: fetch local server cars.json fallback if available
     useEffect(() => {
-        if (isSupabaseConfigured()) {
-            fetchRemoteGarage().then(remoteData => {
-                if (remoteData) {
-                    if (Array.isArray(remoteData.fleet)) {
-                        setApexData(remoteData);
-                        try {
-                            localStorage.setItem('apex_suite_data', JSON.stringify(remoteData));
-                        } catch (e) { }
-                    }
-                    if (remoteData.theme) {
-                        updateTheme(remoteData.theme);
-                    }
+        fetch('/api/data', { cache: 'no-cache' })
+            .then(res => {
+                if (res.ok) return res.json();
+                throw new Error('Offline');
+            })
+            .then(data => {
+                if (data && Array.isArray(data.fleet) && data.fleet.length > 0) {
+                    const cleanFleet = data.fleet.map((c, i) => sanitizeCar(c, i)).filter(Boolean);
+                    const cleanData = { ...data, fleet: cleanFleet };
+                    setApexData(cleanData);
+                    try {
+                        localStorage.setItem('apex_suite_data', JSON.stringify(cleanData));
+                    } catch (e) { }
                 }
-            });
-        } else {
-            // Local fallback
-            fetch('/api/data', { cache: 'no-cache' })
-                .then(res => {
-                    if (res.ok) return res.json();
-                    throw new Error('Offline');
-                })
-                .then(data => {
-                    if (data && Array.isArray(data.fleet)) {
-                        setApexData(data);
-                        try {
-                            localStorage.setItem('apex_suite_data', JSON.stringify(data));
-                        } catch (e) { }
-                    }
-                })
-                .catch(() => { });
-        }
+            })
+            .catch(() => { });
     }, []);
 
     // Global keyboard shortcuts
@@ -155,63 +114,83 @@ export default function App() {
                 if (e.key === 'Escape') {
                     setIsCarModalOpen(false);
                     setIsDossierOpen(false);
-                    setIsWishModalOpen(false);
                     setIsStudioOpen(false);
                 }
                 return;
             }
 
-            if (e.key === '\\') {
-                e.preventDefault();
-                setIsZenMode(prev => !prev);
-                return;
-            }
-
-            if (isZenMode && e.key === 'Escape') {
-                e.preventDefault();
-                setIsZenMode(false);
-                return;
-            }
-
-            if (e.key === '1') setActiveView('cockpit');
-            if (e.key === '2') setActiveView('showroom');
-            if (e.key === '3') setActiveView('registry');
-            if (e.key === '4') setActiveView('peghunt');
-            if (e.key === '5') setActiveView('libraries');
-            if (e.key === 'n' || e.key === 'N') {
-                setEditCarId(null);
-                setIsCarModalOpen(true);
-            }
-            if (e.key === 't' || e.key === 'T') {
-                setIsStudioOpen(prev => !prev);
-            }
-            if (e.key === 'Escape') {
-                setIsCarModalOpen(false);
-                setIsDossierOpen(false);
-                setIsWishModalOpen(false);
-                setIsStudioOpen(false);
+            switch (e.key.toLowerCase()) {
+                case '1':
+                    setActiveView('showroom');
+                    break;
+                case '2':
+                    setActiveView('registry');
+                    break;
+                case '3':
+                    setActiveView('libraries');
+                    break;
+                case 'n':
+                    e.preventDefault();
+                    setEditCarId(null);
+                    setIsCarModalOpen(true);
+                    break;
+                case 't':
+                    e.preventDefault();
+                    setIsStudioOpen(prev => !prev);
+                    break;
+                case 'z':
+                    setIsZenMode(prev => !prev);
+                    break;
+                case 'escape':
+                    setIsCarModalOpen(false);
+                    setIsDossierOpen(false);
+                    setIsStudioOpen(false);
+                    break;
+                default:
+                    break;
             }
         };
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isZenMode]);
+    }, []);
 
-    // Zen mode toggle on body
+    // Zen Mode Class on Body
     useEffect(() => {
-        document.body.classList.toggle('zen-mode', isZenMode);
+        if (isZenMode) {
+            document.body.classList.add('zen-mode');
+        } else {
+            document.body.classList.remove('zen-mode');
+        }
     }, [isZenMode]);
 
-    // Vehicle CRUD
-    const handleSaveCar = (carPayload) => {
-        const isEditing = apexData.fleet.some(c => c.id === carPayload.id);
+    // Vehicle CRUD Handlers
+    const handleSaveCar = (carData) => {
+        const cleanCar = sanitizeCar(carData);
+        if (!cleanCar) return;
+
         let updatedFleet;
-        if (isEditing) {
-            updatedFleet = apexData.fleet.map(c => c.id === carPayload.id ? carPayload : c);
+        const exists = apexData.fleet.some(c => c.id === cleanCar.id);
+        if (exists) {
+            updatedFleet = apexData.fleet.map(c => c.id === cleanCar.id ? cleanCar : c);
         } else {
-            updatedFleet = [carPayload, ...apexData.fleet];
+            updatedFleet = [cleanCar, ...apexData.fleet];
         }
-        saveAndSyncData({ ...apexData, fleet: updatedFleet });
+
+        const updatedBrands = apexData.brands.includes(cleanCar.brand)
+            ? apexData.brands
+            : [...apexData.brands, cleanCar.brand];
+
+        const updatedMakers = apexData.makers.includes(cleanCar.maker)
+            ? apexData.makers
+            : [...apexData.makers, cleanCar.maker];
+
+        saveAndSyncData({
+            ...apexData,
+            fleet: updatedFleet,
+            brands: updatedBrands,
+            makers: updatedMakers
+        });
     };
 
     const handleDeleteCar = (carId) => {
@@ -221,29 +200,15 @@ export default function App() {
 
     const handleToggleFavorite = (carId) => {
         const updatedFleet = apexData.fleet.map(c => {
-            if (c.id === carId) return { ...c, isFavorite: !c.isFavorite };
+            if (c.id === carId) {
+                return { ...c, isFavorite: !c.isFavorite };
+            }
             return c;
         });
         saveAndSyncData({ ...apexData, fleet: updatedFleet });
     };
 
-    // Wishlist actions
-    const handleSaveWish = (wishItem) => {
-        const updatedWishlist = [wishItem, ...apexData.wishlist];
-        saveAndSyncData({ ...apexData, wishlist: updatedWishlist });
-    };
-
-    const handleDeleteWish = (wishId) => {
-        const updatedWishlist = apexData.wishlist.filter(w => w.id !== wishId);
-        saveAndSyncData({ ...apexData, wishlist: updatedWishlist });
-    };
-
-    const handleGraduateWish = (wishItem) => {
-        setEditCarId(null);
-        setIsCarModalOpen(true);
-    };
-
-    // Libraries actions
+    // Library Handlers
     const handleAddBrand = (brandName) => {
         if (!apexData.brands.includes(brandName)) {
             saveAndSyncData({ ...apexData, brands: [...apexData.brands, brandName] });
@@ -264,18 +229,60 @@ export default function App() {
         saveAndSyncData({ ...apexData, makers: apexData.makers.filter(m => m !== makerName) });
     };
 
-    // Export JSON (Owner Protected)
-    const handleExportJSON = () => {
-        requireOwner(() => {
-            const blob = new Blob([JSON.stringify(apexData, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `APEX_Fleet_Backup_${new Date().toISOString().substring(0, 10)}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-        });
-    };
+    // Automatic Import & Cleaner (Uploads from Downloads, strips bloat, saves locally)
+    const handleImportJSON = useCallback((file) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const raw = JSON.parse(e.target.result);
+                const rawFleet = Array.isArray(raw) ? raw : (raw.fleet || []);
+                const cleanFleet = rawFleet.map((c, i) => sanitizeCar(c, i)).filter(Boolean);
+
+                if (cleanFleet.length === 0) {
+                    alert('No vehicles found in the selected file.');
+                    return;
+                }
+
+                // Automatically extract all unique marques and makers from the imported fleet
+                const importedBrands = Array.from(new Set(cleanFleet.map(c => c.brand).filter(Boolean)));
+                const importedMakers = Array.from(new Set(cleanFleet.map(c => c.maker).filter(Boolean)));
+
+                const mergedBrands = Array.from(new Set([...(raw.brands || []), ...importedBrands, ...(apexData.brands || [])]));
+                const mergedMakers = Array.from(new Set([...(raw.makers || []), ...importedMakers, ...(apexData.makers || [])]));
+
+                const newCleanData = {
+                    fleet: cleanFleet,
+                    brands: mergedBrands,
+                    makers: mergedMakers
+                };
+
+                saveAndSyncData(newCleanData);
+                alert(`Successfully imported and cleaned ${cleanFleet.length} vehicles! Unnecessary CRM fields were stripped.`);
+            } catch (err) {
+                console.error(err);
+                alert('Failed to read JSON file. Please check that the file contains valid JSON.');
+            }
+        };
+        reader.readAsText(file);
+    }, [apexData.brands, apexData.makers, saveAndSyncData]);
+
+    // Export Clean JSON
+    const handleExportJSON = useCallback(() => {
+        const cleanFleet = apexData.fleet.map((c, i) => sanitizeCar(c, i)).filter(Boolean);
+        const cleanData = {
+            fleet: cleanFleet,
+            brands: apexData.brands,
+            makers: apexData.makers,
+            exportedAt: new Date().toISOString()
+        };
+        const blob = new Blob([JSON.stringify(cleanData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `APEX_Fleet_Clean_${new Date().toISOString().substring(0, 10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }, [apexData]);
 
     const activeDossierCar = apexData.fleet.find(c => c.id === dossierCarId);
     const activeEditCar = apexData.fleet.find(c => c.id === editCarId);
@@ -288,77 +295,19 @@ export default function App() {
             <div className="ambient-warmth-orb orb-bottom" />
 
             <div className="app-shell" id="appShell">
-                {/* Top Telemetry & Vault Security Status Bar */}
-                <div className="top-status-bar">
-                    <div className="status-brand-mark">
-                        <span className="status-dot" />
-                        <span>VAULT ONLINE</span>
-                    </div>
-
-                    <div className="status-auth-pill">
-                        {isOwnerLoggedIn ? (
-                            <div className="owner-status-chip">
-                                <span className="owner-dot" />
-                                <span className="owner-label">OWNER ACTIVE</span>
-                                {ownerSession?.user?.email && (
-                                    <span className="owner-email">{ownerSession.user.email}</span>
-                                )}
-                                <button
-                                    className="btn-auth-switch"
-                                    onClick={handleSignOut}
-                                    title="Sign out to Viewer Mode"
-                                    type="button"
-                                >
-                                    Log Out
-                                </button>
-                            </div>
-                        ) : (
-                            <div className="viewer-status-chip">
-                                <span className="viewer-label">VIEWER MODE</span>
-                                <button
-                                    className="btn-auth-switch"
-                                    onClick={() => setIsAuthModalOpen(true)}
-                                    title="Sign in as Owner"
-                                    type="button"
-                                >
-                                    Sign In
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                </div>
-
                 {/* macOS Floating Frosted Glass Dock */}
                 <MacDock
                     activeView={activeView}
                     setActiveView={setActiveView}
                     onOpenStudio={() => setIsStudioOpen(true)}
-                    onAddCar={() => requireOwner(() => {
+                    onAddCar={() => {
                         setEditCarId(null);
                         setIsCarModalOpen(true);
-                    })}
-                    isOwnerLoggedIn={isOwnerLoggedIn}
-                    ownerUser={ownerSession?.user}
-                    onOpenAuthModal={() => setIsAuthModalOpen(true)}
-                    onSignOut={handleSignOut}
+                    }}
                 />
 
                 {/* Main Views Container */}
                 <main className="main-stage">
-                    <Cockpit
-                        fleet={apexData.fleet}
-                        activeView={activeView}
-                        themeTokens={tokens}
-                        onOpenDossier={(carId) => {
-                            setDossierCarId(carId);
-                            setIsDossierOpen(true);
-                        }}
-                        onAddCar={() => requireOwner(() => {
-                            setEditCarId(null);
-                            setIsCarModalOpen(true);
-                        })}
-                    />
-
                     <Showroom
                         fleet={apexData.fleet}
                         activeView={activeView}
@@ -366,11 +315,11 @@ export default function App() {
                             setDossierCarId(carId);
                             setIsDossierOpen(true);
                         }}
-                        onEditCar={(carId) => requireOwner(() => {
+                        onEditCar={(carId) => {
                             setEditCarId(carId);
                             setIsCarModalOpen(true);
-                        })}
-                        onToggleFavorite={(carId) => requireOwner(() => handleToggleFavorite(carId))}
+                        }}
+                        onToggleFavorite={(carId) => handleToggleFavorite(carId)}
                     />
 
                     <Registry
@@ -380,34 +329,27 @@ export default function App() {
                             setDossierCarId(carId);
                             setIsDossierOpen(true);
                         }}
-                        onEditCar={(carId) => requireOwner(() => {
+                        onEditCar={(carId) => {
                             setEditCarId(carId);
                             setIsCarModalOpen(true);
-                        })}
-                        onAddCar={() => requireOwner(() => {
+                        }}
+                        onAddCar={() => {
                             setEditCarId(null);
                             setIsCarModalOpen(true);
-                        })}
-                        onToggleFavorite={(carId) => requireOwner(() => handleToggleFavorite(carId))}
+                        }}
+                        onToggleFavorite={(carId) => handleToggleFavorite(carId)}
                         onExportJSON={handleExportJSON}
-                    />
-
-                    <PegHunt
-                        wishlist={apexData.wishlist}
-                        activeView={activeView}
-                        onAddWish={() => requireOwner(() => setIsWishModalOpen(true))}
-                        onGraduateWish={(wishItem) => requireOwner(() => handleGraduateWish(wishItem))}
-                        onDeleteWish={(wishId) => requireOwner(() => handleDeleteWish(wishId))}
+                        onImportJSON={handleImportJSON}
                     />
 
                     <Libraries
                         brands={apexData.brands}
                         makers={apexData.makers}
                         activeView={activeView}
-                        onAddBrand={(b) => requireOwner(() => handleAddBrand(b))}
-                        onDeleteBrand={(b) => requireOwner(() => handleDeleteBrand(b))}
-                        onAddMaker={(m) => requireOwner(() => handleAddMaker(m))}
-                        onDeleteMaker={(m) => requireOwner(() => handleDeleteMaker(m))}
+                        onAddBrand={handleAddBrand}
+                        onDeleteBrand={handleDeleteBrand}
+                        onAddMaker={handleAddMaker}
+                        onDeleteMaker={handleDeleteMaker}
                     />
                 </main>
             </div>
@@ -416,7 +358,7 @@ export default function App() {
             <VehicleModal
                 isOpen={isCarModalOpen}
                 onClose={() => setIsCarModalOpen(false)}
-                onSave={(car) => requireOwner(() => handleSaveCar(car))}
+                onSave={handleSaveCar}
                 brands={apexData.brands}
                 makers={apexData.makers}
                 editCar={activeEditCar}
@@ -426,50 +368,23 @@ export default function App() {
                 isOpen={isDossierOpen}
                 car={activeDossierCar}
                 onClose={() => setIsDossierOpen(false)}
-                onEdit={(carId) => requireOwner(() => {
+                onEdit={(carId) => {
                     setEditCarId(carId);
                     setIsCarModalOpen(true);
-                })}
-                onDelete={(carId) => requireOwner(() => handleDeleteCar(carId))}
-                onToggleFavorite={(carId) => requireOwner(() => handleToggleFavorite(carId))}
-            />
-
-            <WishModal
-                isOpen={isWishModalOpen}
-                onClose={() => setIsWishModalOpen(false)}
-                onSave={(w) => requireOwner(() => handleSaveWish(w))}
-                brands={apexData.brands}
-                makers={apexData.makers}
+                }}
+                onDelete={handleDeleteCar}
+                onToggleFavorite={handleToggleFavorite}
             />
 
             <ThemeDrawer
                 isOpen={isStudioOpen}
                 onClose={() => setIsStudioOpen(false)}
                 themeState={themeState}
-                updateTheme={handleUpdateTheme}
-                resetTheme={handleResetTheme}
-                apexData={apexData}
-                onImportData={(data) => requireOwner(() => saveAndSyncData(data))}
+                tokens={tokens}
+                onUpdateTheme={handleUpdateTheme}
+                onResetTheme={handleResetTheme}
                 onExportBackup={handleExportJSON}
             />
-
-            <AuthModal
-                isOpen={isAuthModalOpen}
-                onClose={() => setIsAuthModalOpen(false)}
-                onAuthSuccess={(session) => {
-                    setOwnerSession(session);
-                }}
-            />
-
-            {/* Zen Mode Exit Indicator */}
-            {isZenMode && (
-                <div
-                    className="zen-exit-indicator"
-                    onClick={() => setIsZenMode(false)}
-                >
-                    CLICK ANYWHERE OR PRESS ESC TO EXIT ZEN VIEW
-                </div>
-            )}
         </>
     );
 }

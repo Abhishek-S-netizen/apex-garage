@@ -2,23 +2,23 @@
 import { useState, useEffect, useCallback } from 'react';
 
 const STORAGE_KEY = 'apex_studio_state';
-const VERSION = 4;
+const VERSION = 9;
 
 export const PALETTE = {
-    bgGradientStart: '#BDA794', // Champagne Sand
-    bgGradientEnd: '#1A1819',   // Warm Obsidian
-    bgDeep: '#121011',
-    defaultAccent: '#9F3E3E',   // Atelier Carmine Red
-    cardBaseRGB: '26, 24, 25'
+    bgGradientStart: '#000000', // Pure Black
+    bgGradientEnd: '#000000',
+    bgDeep: '#000000',
+    defaultAccent: '#1550F0',   // Royal Cobalt Blue
+    cardBaseRGB: '14, 14, 16'
 };
 
 export const SWATCHES = [
-    { color: '#9F3E3E', label: 'Atelier Carmine Red' },
-    { color: '#BDA794', label: 'Champagne Sand Dune' },
-    { color: '#E5202B', label: 'Rosso Corsa' },
-    { color: '#D4AF37', label: 'Monza Brass / Gold' },
-    { color: '#00F0FF', label: 'Electric Cyan' },
-    { color: '#EDEDF2', label: 'Matte Titanium' }
+    { color: '#1550F0', label: 'Cobalt Blue' },
+    { color: '#E95532', label: 'Vermilion Dock' },
+    { color: '#2C3752', label: 'Twilight Slate' },
+    { color: '#47C7FC', label: 'Electric Sky Blue' },
+    { color: '#FC6200', label: 'Tangerine Racing Orange' },
+    { color: '#E5202B', label: 'Rosso Corsa' }
 ];
 
 export const DEFAULT_THEME_STATE = {
@@ -26,7 +26,7 @@ export const DEFAULT_THEME_STATE = {
     eyebrowContrast: 50,
     cornerRadius: 18,
     autoAdapt: true,
-    customAccent: null
+    customAccent: '#1550F0'
 };
 
 function hexToRgb(hex) {
@@ -59,8 +59,8 @@ export function deriveTokens(state) {
     const alpha = (state.cardOpacity / 100).toFixed(2);
     const r = state.cornerRadius;
 
-    const eyebrowLightness = Math.round(38 + ((state.eyebrowContrast || 50) * 0.42));
-    const eyebrowColor = `hsl(28, 16%, ${eyebrowLightness}%)`;
+    const eyebrowLightness = Math.round(30 + ((state.eyebrowContrast || 50) * 0.35));
+    const eyebrowColor = `hsl(204, 25%, ${eyebrowLightness}%)`;
 
     const css = {
         '--palette-sand': PALETTE.bgGradientStart,
@@ -81,10 +81,10 @@ export function deriveTokens(state) {
 
         '--accent': accentHex,
         '--accent-bright': mixWithWhite(a, 0.22),
-        '--accent-glow': rgba(a, 0.42),
+        '--accent-glow': 'transparent',
         '--accent-subtle': rgba(a, 0.16),
         '--accent-border': rgba(a, 0.38),
-        '--card-border-glow': rgba(a, 0.18),
+        '--card-border-glow': 'transparent',
         '--btn-text': contrastText(a)
     };
 
@@ -104,13 +104,15 @@ export function useApexTheme() {
             const raw = localStorage.getItem(STORAGE_KEY);
             if (raw) {
                 const parsed = JSON.parse(raw);
-                return {
-                    cardOpacity: Math.min(100, Math.max(15, Number(parsed.cardOpacity) || 78)),
-                    eyebrowContrast: Math.min(100, Math.max(0, Number(parsed.eyebrowContrast) || 50)),
-                    cornerRadius: Math.min(36, Math.max(6, Number(parsed.cornerRadius) || 18)),
-                    autoAdapt: typeof parsed.autoAdapt === 'boolean' ? parsed.autoAdapt : true,
-                    customAccent: parsed.customAccent || null
-                };
+                if (parsed.version === VERSION) {
+                    return {
+                        cardOpacity: Math.min(100, Math.max(15, Number(parsed.cardOpacity) || 78)),
+                        eyebrowContrast: Math.min(100, Math.max(0, Number(parsed.eyebrowContrast) || 50)),
+                        cornerRadius: Math.min(36, Math.max(6, Number(parsed.cornerRadius) || 18)),
+                        autoAdapt: typeof parsed.autoAdapt === 'boolean' ? parsed.autoAdapt : true,
+                        customAccent: parsed.customAccent || '#1550F0'
+                    };
+                }
             }
         } catch (e) { }
         return DEFAULT_THEME_STATE;
