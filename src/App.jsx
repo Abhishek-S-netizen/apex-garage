@@ -230,40 +230,48 @@ export default function App() {
     };
 
     // Automatic Import & Cleaner (Uploads from Downloads, strips bloat, saves locally)
-    const handleImportJSON = useCallback((file) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const raw = JSON.parse(e.target.result);
-                const rawFleet = Array.isArray(raw) ? raw : (raw.fleet || []);
-                const cleanFleet = rawFleet.map((c, i) => sanitizeCar(c, i)).filter(Boolean);
+    const handleImportJSON = useCallback((fileOrData) => {
+        const processData = (raw) => {
+            const rawFleet = Array.isArray(raw) ? raw : (raw.fleet || []);
+            const cleanFleet = rawFleet.map((c, i) => sanitizeCar(c, i)).filter(Boolean);
 
-                if (cleanFleet.length === 0) {
-                    alert('No vehicles found in the selected file.');
-                    return;
-                }
-
-                // Automatically extract all unique marques and makers from the imported fleet
-                const importedBrands = Array.from(new Set(cleanFleet.map(c => c.brand).filter(Boolean)));
-                const importedMakers = Array.from(new Set(cleanFleet.map(c => c.maker).filter(Boolean)));
-
-                const mergedBrands = Array.from(new Set([...(raw.brands || []), ...importedBrands, ...(apexData.brands || [])]));
-                const mergedMakers = Array.from(new Set([...(raw.makers || []), ...importedMakers, ...(apexData.makers || [])]));
-
-                const newCleanData = {
-                    fleet: cleanFleet,
-                    brands: mergedBrands,
-                    makers: mergedMakers
-                };
-
-                saveAndSyncData(newCleanData);
-                alert(`Successfully imported and cleaned ${cleanFleet.length} vehicles! Unnecessary CRM fields were stripped.`);
-            } catch (err) {
-                console.error(err);
-                alert('Failed to read JSON file. Please check that the file contains valid JSON.');
+            if (cleanFleet.length === 0) {
+                alert('No vehicles found in the selected file.');
+                return;
             }
+
+            // Automatically extract all unique marques and makers from the imported fleet
+            const importedBrands = Array.from(new Set(cleanFleet.map(c => c.brand).filter(Boolean)));
+            const importedMakers = Array.from(new Set(cleanFleet.map(c => c.maker).filter(Boolean)));
+
+            const mergedBrands = Array.from(new Set([...(raw.brands || []), ...importedBrands, ...(apexData.brands || [])]));
+            const mergedMakers = Array.from(new Set([...(raw.makers || []), ...importedMakers, ...(apexData.makers || [])]));
+
+            const newCleanData = {
+                fleet: cleanFleet,
+                brands: mergedBrands,
+                makers: mergedMakers
+            };
+
+            saveAndSyncData(newCleanData);
+            alert(`Successfully restored ${cleanFleet.length} vehicles!`);
         };
-        reader.readAsText(file);
+
+        if (fileOrData instanceof File || fileOrData instanceof Blob) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const raw = JSON.parse(e.target.result);
+                    processData(raw);
+                } catch (err) {
+                    console.error(err);
+                    alert('Failed to read JSON file. Please check that the file contains valid JSON.');
+                }
+            };
+            reader.readAsText(fileOrData);
+        } else if (fileOrData && typeof fileOrData === 'object') {
+            processData(fileOrData);
+        }
     }, [apexData.brands, apexData.makers, saveAndSyncData]);
 
     // Export Clean JSON
@@ -381,9 +389,13 @@ export default function App() {
                 onClose={() => setIsStudioOpen(false)}
                 themeState={themeState}
                 tokens={tokens}
+                updateTheme={handleUpdateTheme}
                 onUpdateTheme={handleUpdateTheme}
+                resetTheme={handleResetTheme}
                 onResetTheme={handleResetTheme}
                 onExportBackup={handleExportJSON}
+                onImportData={handleImportJSON}
+                apexData={apexData}
             />
         </>
     );

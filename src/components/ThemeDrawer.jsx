@@ -1,16 +1,22 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { SWATCHES } from '../theme/themeEngine.js';
 
 export default function ThemeDrawer({
     isOpen,
     onClose,
     themeState,
-    updateTheme,
-    resetTheme,
+    updateTheme: propUpdateTheme,
+    onUpdateTheme,
+    resetTheme: propResetTheme,
+    onResetTheme,
     apexData = null,
     onImportData = () => { },
     onExportBackup = null
 }) {
+    const updateTheme = propUpdateTheme || onUpdateTheme || (() => { });
+    const resetTheme = propResetTheme || onResetTheme || (() => { });
+    const fileInputRef = useRef(null);
+
     const currentAccent = (themeState.autoAdapt
         ? '#9F3E3E'
         : (themeState.customAccent || '#9F3E3E')
@@ -39,12 +45,13 @@ export default function ThemeDrawer({
         reader.onload = (event) => {
             try {
                 const parsed = JSON.parse(event.target.result);
-                if (parsed && Array.isArray(parsed.fleet)) {
-                    if (window.confirm(`Restore garage backup containing ${parsed.fleet.length} vehicles? This will update your hard-disk collection.`)) {
+                const count = Array.isArray(parsed) ? parsed.length : (parsed.fleet ? parsed.fleet.length : 0);
+                if (count > 0) {
+                    if (window.confirm(`Restore garage backup containing ${count} vehicles? This will update your collection.`)) {
                         onImportData(parsed);
                     }
                 } else {
-                    alert('Invalid APEX backup file. File must contain a fleet array.');
+                    alert('Invalid APEX backup file. File must contain vehicles.');
                 }
             } catch (err) {
                 alert('Error parsing JSON backup file.');
@@ -198,20 +205,26 @@ export default function ThemeDrawer({
                                     <span>Export JSON</span>
                                 </button>
 
-                                <label className="btn-backup btn-backup-upload" title="Restore garage collection from JSON backup">
+                                <button
+                                    type="button"
+                                    className="btn-backup btn-backup-upload"
+                                    title="Restore garage collection from JSON backup"
+                                    onClick={() => fileInputRef.current?.click()}
+                                >
                                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                                         <polyline points="17 8 12 3 7 8" />
                                         <line x1="12" y1="3" x2="12" y2="15" />
                                     </svg>
                                     <span>Restore JSON</span>
-                                    <input
-                                        type="file"
-                                        accept=".json"
-                                        style={{ display: 'none' }}
-                                        onChange={handleImportFile}
-                                    />
-                                </label>
+                                </button>
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept=".json,application/json"
+                                    style={{ display: 'none' }}
+                                    onChange={handleImportFile}
+                                />
                             </div>
                         </div>
                     </div>

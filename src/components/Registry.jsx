@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 
 export default function Registry({
     fleet,
@@ -10,6 +10,8 @@ export default function Registry({
     onExportJSON,
     onImportJSON
 }) {
+    const importInputRef = useRef(null);
+
     return (
         <section className={`view-panel ${activeView === 'registry' ? 'active' : ''}`} id="viewRegistry">
             <div className="registry-wrapper">
@@ -22,26 +24,33 @@ export default function Registry({
                         </p>
                     </div>
                     <div className="registry-actions">
-                        <label className="btn-hud-secondary" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }} title="Import backup JSON file and auto-clean fields">
+                        <button
+                            type="button"
+                            className="btn-hud-secondary"
+                            style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                            title="Import backup JSON file and auto-clean fields"
+                            onClick={() => importInputRef.current?.click()}
+                        >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                                 <polyline points="17 8 12 3 7 8" />
                                 <line x1="12" y1="3" x2="12" y2="15" />
                             </svg>
                             <span>Import JSON</span>
-                            <input
-                                type="file"
-                                accept=".json,application/json"
-                                style={{ display: 'none' }}
-                                onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    if (file && onImportJSON) {
-                                        onImportJSON(file);
-                                        e.target.value = '';
-                                    }
-                                }}
-                            />
-                        </label>
+                        </button>
+                        <input
+                            ref={importInputRef}
+                            type="file"
+                            accept=".json,application/json"
+                            style={{ display: 'none' }}
+                            onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file && onImportJSON) {
+                                    onImportJSON(file);
+                                    e.target.value = '';
+                                }
+                            }}
+                        />
                         <button className="btn-hud-secondary" id="btnExportFleetJSON" onClick={onExportJSON} type="button">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
