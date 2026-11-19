@@ -28,13 +28,13 @@ export default function App() {
     // Theme Engine
     const { themeState, tokens, updateTheme, resetTheme } = useApexTheme();
 
-    // Collection State (Stored strictly on laptop disk / browser storage)
+    // Primary Collection State (Laptop disk cars.json is the master database)
     const [apexData, setApexData] = useState(() => {
         try {
             const saved = localStorage.getItem('apex_suite_data');
             if (saved !== null) {
                 const parsed = JSON.parse(saved);
-                if (parsed && Array.isArray(parsed.fleet)) {
+                if (parsed && Array.isArray(parsed.fleet) && parsed.fleet.length > 0) {
                     return {
                         ...parsed,
                         fleet: parsed.fleet.map((c, i) => sanitizeCar(c, i)).filter(Boolean)
@@ -59,7 +59,7 @@ export default function App() {
     const [isDossierOpen, setIsDossierOpen] = useState(false);
     const [dossierCarId, setDossierCarId] = useState(null);
 
-    // Save strictly to local laptop storage
+    // Save directly to physical cars.json on laptop disk
     const saveAndSyncData = useCallback((newData) => {
         const cleanFleet = (newData.fleet || []).map((c, i) => sanitizeCar(c, i)).filter(Boolean);
         const cleanData = {
@@ -67,16 +67,20 @@ export default function App() {
             fleet: cleanFleet
         };
         setApexData(cleanData);
-        try {
-            localStorage.setItem('apex_suite_data', JSON.stringify(cleanData));
-        } catch (e) { }
 
-        // Optional local dev server sync to cars.json
+        // 1. Master: Save directly to laptop disk cars.json via local Node/Vite server
         fetch('/api/data', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(cleanData)
-        }).catch(() => { });
+        }).catch((err) => {
+            console.warn('[APEX Disk Sync] Local server not reachable; mirrored locally.');
+        });
+
+        // 2. Mirror: Silent local safety net in browser storage
+        try {
+            localStorage.setItem('apex_suite_data', JSON.stringify(cleanData));
+        } catch (e) { }
     }, []);
 
     const handleUpdateTheme = useCallback((updates) => {
@@ -87,24 +91,43 @@ export default function App() {
         resetTheme();
     }, [resetTheme]);
 
-    // Initial load: fetch local server cars.json fallback if available
+    // Initial load & automatic disk migration
     useEffect(() => {
         fetch('/api/data', { cache: 'no-cache' })
             .then(res => {
                 if (res.ok) return res.json();
                 throw new Error('Offline');
             })
-            .then(data => {
-                if (data && Array.isArray(data.fleet) && data.fleet.length > 0) {
-                    const cleanFleet = data.fleet.map((c, i) => sanitizeCar(c, i)).filter(Boolean);
-                    const cleanData = { ...data, fleet: cleanFleet };
+            .then(diskData => {
+                const diskFleetCount = (diskData && Array.isArray(diskData.fleet)) ? diskData.fleet.length : 0;
+                const localFleetCount = (apexData && Array.isArray(apexData.fleet)) ? apexData.fleet.length : 0;
+
+                // Case A: Browser has more cars than disk (e.g. 109 cars in browser, 3 on disk)
+                // Automatically migrate the 109 cars to cars.json on disk!
+                if (localFleetCount > diskFleetCount) {
+                    const cleanData = {
+                        ...apexData,
+                        fleet: apexData.fleet.map((c, i) => sanitizeCar(c, i)).filter(Boolean)
+                    };
+                    fetch('/api/data', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(cleanData)
+                    }).catch(() => { });
+                }
+                // Case B: Disk file is the master and has our cars
+                else if (diskFleetCount > 0) {
+                    const cleanFleet = diskData.fleet.map((c, i) => sanitizeCar(c, i)).filter(Boolean);
+                    const cleanData = { ...diskData, fleet: cleanFleet };
                     setApexData(cleanData);
                     try {
                         localStorage.setItem('apex_suite_data', JSON.stringify(cleanData));
                     } catch (e) { }
                 }
             })
-            .catch(() => { });
+            .catch(() => {
+                // If local server is offline, browser state serves seamlessly
+            });
     }, []);
 
     // Global keyboard shortcuts
