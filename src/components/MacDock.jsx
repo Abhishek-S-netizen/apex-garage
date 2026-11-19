@@ -14,7 +14,7 @@ export default function MacDock({
         {
             key: 'showroom',
             label: 'Showroom',
-            title: 'Showroom & Fleet Gallery (Key 1)',
+            title: 'The Showroom (Key 1)',
             renderIcon: (isActive) => isActive ? (
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                     <path
