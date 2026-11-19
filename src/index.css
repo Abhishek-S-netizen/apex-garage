@@ -424,6 +424,7 @@ body {
         opacity: 0;
         transform: translateY(6px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -805,6 +806,7 @@ body {
         opacity: 0;
         transform: translateY(8px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -1231,10 +1233,12 @@ body {
         opacity: 0;
         transform: perspective(1000px) rotateX(15deg) translateY(32px) scale(0.95);
     }
+
     70% {
         opacity: 0.95;
         transform: perspective(1000px) rotateX(-2deg) translateY(-2px) scale(1.008);
     }
+
     100% {
         opacity: 1;
         transform: perspective(1000px) rotateX(0deg) translateY(0) scale(1);
@@ -1413,6 +1417,7 @@ body {
         opacity: 0;
         transform: translateY(10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -1954,8 +1959,8 @@ body {
     margin-top: -234px;
     transform-origin: center center;
     transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-                opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-                visibility 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+        visibility 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     will-change: transform, opacity;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
@@ -2027,6 +2032,7 @@ body {
     .carousel-ring-card.slot-left {
         transform: translate3d(-290px, 0, -130px) rotateY(22deg) scale(0.82);
     }
+
     .carousel-ring-card.slot-right {
         transform: translate3d(290px, 0, -130px) rotateY(-22deg) scale(0.82);
     }
@@ -2037,9 +2043,11 @@ body {
         width: 340px;
         margin-left: -170px;
     }
+
     .carousel-ring-card.slot-left {
         transform: translate3d(-180px, 0, -120px) rotateY(20deg) scale(0.75);
     }
+
     .carousel-ring-card.slot-right {
         transform: translate3d(180px, 0, -120px) rotateY(-20deg) scale(0.75);
     }
@@ -2914,6 +2922,7 @@ body {
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
     }
@@ -2924,14 +2933,17 @@ body {
     width: 6px;
     height: 6px;
 }
+
 ::-webkit-scrollbar-track {
     background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
     background: rgba(189, 167, 148, 0.22);
     border-radius: 999px;
     transition: background 0.2s ease;
 }
+
 ::-webkit-scrollbar-thumb:hover {
     background: rgba(189, 167, 148, 0.52);
 }
@@ -2995,6 +3007,7 @@ body {
         opacity: 0;
         transform: scale(0.95) translateY(10px);
     }
+
     to {
         opacity: 1;
         transform: scale(1) translateY(0);
@@ -3271,6 +3284,7 @@ body {
         opacity: 0;
         transform: translateY(-5px) scale(0.98);
     }
+
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -4104,9 +4118,17 @@ body {
     background: rgba(255, 255, 255, 0.25);
 }
 
-.garage-file-dot.status-linked { background: #2ECC71; }
-.garage-file-dot.status-needs-permission { background: #F5A623; }
-.garage-file-dot.status-error { background: #E5484D; }
+.garage-file-dot.status-linked {
+    background: #2ECC71;
+}
+
+.garage-file-dot.status-needs-permission {
+    background: #F5A623;
+}
+
+.garage-file-dot.status-error {
+    background: #E5484D;
+}
 
 /* Linked Garage File: top banner (only when action is needed) */
 .garage-file-banner {
@@ -4183,6 +4205,112 @@ body {
         justify-content: center;
         text-align: center;
     }
+}
+
+/* First-run / Post-wipe Relink Overlay */
+.garage-welcome-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 950;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(5, 5, 7, 0.78);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.garage-welcome-card {
+    width: 100%;
+    max-width: 440px;
+    background: #0E0F12;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 12px;
+    padding: 28px 26px 22px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+}
+
+.garage-welcome-title {
+    font-family: var(--font-head), 'Syncopate', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #E1E1E1;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 4px 0 0;
+}
+
+.garage-welcome-sub {
+    font-size: 13px;
+    line-height: 1.5;
+    color: rgba(225, 225, 225, 0.72);
+    margin: 0 0 6px;
+}
+
+.garage-welcome-sub code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: #FFFFFF;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 1px 6px;
+    border-radius: 4px;
+}
+
+.garage-welcome-actions {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.garage-welcome-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 11px 16px;
+    border-radius: 8px;
+    background: #1550F0;
+    color: #FFFFFF;
+    border: 1px solid #1550F0;
+}
+
+.garage-welcome-btn:hover {
+    background: #103FBD;
+    border-color: #103FBD;
+    color: #FFFFFF;
+}
+
+.garage-welcome-actions .btn-hud-secondary.garage-welcome-btn {
+    background: rgba(255, 255, 255, 0.06);
+    color: #E1E1E1;
+    border-color: rgba(255, 255, 255, 0.14);
+}
+
+.garage-welcome-actions .btn-hud-secondary.garage-welcome-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: #1550F0;
+    color: #FFFFFF;
+}
+
+.garage-welcome-skip {
+    background: none;
+    border: none;
+    color: rgba(225, 225, 225, 0.48);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    cursor: pointer;
+    margin-top: 4px;
+    padding: 4px 8px;
+}
+
+.garage-welcome-skip:hover {
+    color: #E1E1E1;
 }
 
 .drawer-actions {
@@ -4277,6 +4405,7 @@ body.zen-mode .macos-dock-header {
    Engineered without modifying or breaking any desktop viewports.
 ══════════════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
+
     /* 1. Shell & Safe Area Spacing (Notch / Dynamic Island Protection) */
     .app-shell {
         height: auto;
@@ -5024,7 +5153,8 @@ body.zen-mode .macos-dock-header {
     /* Generous Vertical Spacing in between Marque Rows / Wings */
     .pavilion-brand-section {
         gap: 14px !important;
-        margin-bottom: 74px !important; /* Expanded breathing room between Porsche, Dodge, etc. */
+        margin-bottom: 74px !important;
+        /* Expanded breathing room between Porsche, Dodge, etc. */
     }
 
     .pavilion-brand-header {
@@ -5077,7 +5207,8 @@ body.zen-mode .macos-dock-header {
         display: flex !important;
         flex-direction: column !important;
         grid-template-columns: none !important;
-        gap: 14px !important; /* Generous breathing room between individual cards */
+        gap: 14px !important;
+        /* Generous breathing room between individual cards */
         width: 100% !important;
     }
 
@@ -5745,12 +5876,15 @@ body.zen-mode .macos-dock-header {
     .top-status-bar {
         padding: 10px 14px 2px 14px;
     }
+
     .status-brand-mark {
         display: none;
     }
+
     .owner-email {
         display: none;
     }
+
     .owner-status-chip,
     .viewer-status-chip {
         font-size: 10px;

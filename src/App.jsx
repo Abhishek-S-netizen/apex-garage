@@ -40,24 +40,40 @@ export default function App() {
     const { themeState, tokens, updateTheme, resetTheme } = useApexTheme();
 
     // Primary Collection State (Laptop disk cars.json is the master database)
-    const [apexData, setApexData] = useState(() => {
+    // Browser storage is only a fast preview / safety copy.
+    const [initialLoad] = useState(() => {
         try {
             const saved = localStorage.getItem('apex_suite_data');
             if (saved !== null) {
                 const parsed = JSON.parse(saved);
                 if (parsed && Array.isArray(parsed.fleet) && parsed.fleet.length > 0) {
                     return {
-                        ...parsed,
-                        fleet: parsed.fleet.map((c, i) => sanitizeCar(c, i)).filter(Boolean)
+                        hadSavedData: true,
+                        data: {
+                            ...parsed,
+                            fleet: parsed.fleet.map((c, i) => sanitizeCar(c, i)).filter(Boolean)
+                        }
                     };
                 }
             }
         } catch (e) { }
+        // Nothing saved (first visit or browser data was cleared).
+        // With file support, start empty so sample cars never end up in your real file.
+        if (isFileAccessSupported) {
+            return {
+                hadSavedData: false,
+                data: { fleet: [], brands: DEFAULT_APEX_DATA.brands || [], makers: DEFAULT_APEX_DATA.makers || [] }
+            };
+        }
         return {
-            ...DEFAULT_APEX_DATA,
-            fleet: DEFAULT_APEX_DATA.fleet.map((c, i) => sanitizeCar(c, i)).filter(Boolean)
+            hadSavedData: false,
+            data: {
+                ...DEFAULT_APEX_DATA,
+                fleet: DEFAULT_APEX_DATA.fleet.map((c, i) => sanitizeCar(c, i)).filter(Boolean)
+            }
         };
     });
+    const [apexData, setApexData] = useState(initialLoad.data);
 
     const [activeView, setActiveView] = useState('showroom');
     const [isZenMode, setIsZenMode] = useState(false);
@@ -78,10 +94,18 @@ export default function App() {
         error: null
     });
     const [isFileBannerDismissed, setIsFileBannerDismissed] = useState(false);
+    // Welcome / relink screen dismissed ("continue without a file")
+    const [isWelcomeDismissed, setIsWelcomeDismissed] = useState(false);
     const fileHandleRef = useRef(null);
     const writeQueueRef = useRef(Promise.resolve());
     const apexDataRef = useRef(apexData);
     useEffect(() => { apexDataRef.current = apexData; }, [apexData]);
+    const garageStatusRef = useRef(garageFile.status);
+    useEffect(() => { garageStatusRef.current = garageFile.status; }, [garageFile.status]);
+
+    // Editing is locked while a linked file is waiting to be reconnected,
+    // so nothing is changed in the browser only and then overwritten by the file.
+    const isEditLocked = garageFile.status === 'needs-permission' || garageFile.status === 'error';
 
     // Turn raw file contents into clean app data
     const normalizeData = (raw) => {
@@ -114,6 +138,12 @@ export default function App() {
 
     // Save: linked cars.json on disk (master) + browser mirror (safety net)
     const saveAndSyncData = useCallback((newData) => {
+        // Safety lock: never change data while the linked file is disconnected
+        const status = garageStatusRef.current;
+        if (status === 'needs-permission' || status === 'error') {
+            alert('Reconnect your garage file first (button at the top), so this change is saved to disk and not lost.');
+            return;
+        }
         const cleanFleet = (newData.fleet || []).map((c, i) => sanitizeCar(c, i)).filter(Boolean);
         const cleanData = {
             ...newData,
@@ -222,14 +252,31 @@ export default function App() {
     const handleReconnectGarageFile = async () => {
         const handle = fileHandleRef.current;
         if (!handle) return handleOpenGarageFile();
+        const wasError = garageStatusRef.current === 'error';
         try {
             if (await ensurePermission(handle, true)) {
-                await loadFromLinkedFile(handle);
+                if (wasError) {
+                    // A save failed mid-session: the app has the newest data, so push it to disk
+                    await writeGarageFile(handle, apexDataRef.current);
+                } else {
+                    // Fresh session: the file on disk is the source of truth
+                    await loadFromLinkedFile(handle);
+                }
                 setGarageFile({ status: 'linked', name: handle.name, error: null });
             }
         } catch (err) {
             setGarageFile({ status: 'error', name: handle.name, error: err.message });
         }
+    };
+
+    // Opening the add/edit form while locked asks to reconnect instead,
+    // so you never fill a form that can't be saved.
+    const runIfEditable = (action) => {
+        if (isEditLocked) {
+            handleReconnectGarageFile();
+            return;
+        }
+        action();
     };
 
     const handleUnlinkGarageFile = async () => {
@@ -275,11 +322,14 @@ export default function App() {
                 case '3':
                     setActiveView('libraries');
                     break;
-                case 'n':
+                case 'n': {
                     e.preventDefault();
+                    const st = garageStatusRef.current;
+                    if (st === 'needs-permission' || st === 'error') break; // locked until reconnected
                     setEditCarId(null);
                     setIsCarModalOpen(true);
                     break;
+                }
                 case 't':
                     e.preventDefault();
                     setIsStudioOpen(prev => !prev);
@@ -451,24 +501,24 @@ export default function App() {
             {/* Garage File status banner (only when action is needed) */}
             {(garageFile.status === 'needs-permission' ||
                 garageFile.status === 'error' ||
-                (garageFile.status === 'unlinked' && !isFileBannerDismissed)) && (
-                <div className={`garage-file-banner ${garageFile.status === 'error' ? 'is-error' : ''}`} role="status">
-                    <span className="garage-file-banner-text">
-                        {garageFile.status === 'needs-permission' && <>Click to reconnect <strong>{garageFile.name}</strong> so changes save to your disk.</>}
-                        {garageFile.status === 'error' && <>Couldn't save to <strong>{garageFile.name}</strong>. Reconnect the file to keep saving.</>}
-                        {garageFile.status === 'unlinked' && <>Your garage isn't saved to a file on your laptop yet.</>}
-                    </span>
-                    {garageFile.status === 'unlinked' ? (
-                        <>
-                            <button type="button" className="garage-file-banner-btn" onClick={handleCreateGarageFile}>Create cars.json</button>
-                            <button type="button" className="garage-file-banner-btn is-ghost" onClick={handleOpenGarageFile}>Open existing</button>
-                            <button type="button" className="garage-file-banner-close" onClick={() => setIsFileBannerDismissed(true)} title="Dismiss">✕</button>
-                        </>
-                    ) : (
-                        <button type="button" className="garage-file-banner-btn" onClick={handleReconnectGarageFile}>Reconnect</button>
-                    )}
-                </div>
-            )}
+                (garageFile.status === 'unlinked' && !isFileBannerDismissed && !(!initialLoad.hadSavedData && apexData.fleet.length === 0 && !isWelcomeDismissed))) && (
+                    <div className={`garage-file-banner ${garageFile.status === 'error' ? 'is-error' : ''}`} role="status">
+                        <span className="garage-file-banner-text">
+                            {garageFile.status === 'needs-permission' && <>Click to reconnect <strong>{garageFile.name}</strong> so changes save to your disk.</>}
+                            {garageFile.status === 'error' && <>Couldn't save to <strong>{garageFile.name}</strong>. Reconnect the file to keep saving.</>}
+                            {garageFile.status === 'unlinked' && <>Your garage isn't saved to a file on your laptop yet.</>}
+                        </span>
+                        {garageFile.status === 'unlinked' ? (
+                            <>
+                                <button type="button" className="garage-file-banner-btn" onClick={handleCreateGarageFile}>Create cars.json</button>
+                                <button type="button" className="garage-file-banner-btn is-ghost" onClick={handleOpenGarageFile}>Open existing</button>
+                                <button type="button" className="garage-file-banner-close" onClick={() => setIsFileBannerDismissed(true)} title="Dismiss">✕</button>
+                            </>
+                        ) : (
+                            <button type="button" className="garage-file-banner-btn" onClick={handleReconnectGarageFile}>Reconnect</button>
+                        )}
+                    </div>
+                )}
             <div className="ambient-warmth-orb orb-top" />
             <div className="ambient-warmth-orb orb-bottom" />
 
@@ -478,10 +528,10 @@ export default function App() {
                     activeView={activeView}
                     setActiveView={setActiveView}
                     onOpenStudio={() => setIsStudioOpen(true)}
-                    onAddCar={() => {
+                    onAddCar={() => runIfEditable(() => {
                         setEditCarId(null);
                         setIsCarModalOpen(true);
-                    }}
+                    })}
                 />
 
                 {/* Main Views Container */}
@@ -493,10 +543,10 @@ export default function App() {
                             setDossierCarId(carId);
                             setIsDossierOpen(true);
                         }}
-                        onEditCar={(carId) => {
+                        onEditCar={(carId) => runIfEditable(() => {
                             setEditCarId(carId);
                             setIsCarModalOpen(true);
-                        }}
+                        })}
                         onToggleFavorite={(carId) => handleToggleFavorite(carId)}
                     />
 
@@ -507,14 +557,14 @@ export default function App() {
                             setDossierCarId(carId);
                             setIsDossierOpen(true);
                         }}
-                        onEditCar={(carId) => {
+                        onEditCar={(carId) => runIfEditable(() => {
                             setEditCarId(carId);
                             setIsCarModalOpen(true);
-                        }}
-                        onAddCar={() => {
+                        })}
+                        onAddCar={() => runIfEditable(() => {
                             setEditCarId(null);
                             setIsCarModalOpen(true);
-                        }}
+                        })}
                         onToggleFavorite={(carId) => handleToggleFavorite(carId)}
                         onExportJSON={handleExportJSON}
                         onImportJSON={handleImportJSON}
@@ -546,10 +596,10 @@ export default function App() {
                 isOpen={isDossierOpen}
                 car={activeDossierCar}
                 onClose={() => setIsDossierOpen(false)}
-                onEdit={(carId) => {
+                onEdit={(carId) => runIfEditable(() => {
                     setEditCarId(carId);
                     setIsCarModalOpen(true);
-                }}
+                })}
                 onDelete={handleDeleteCar}
                 onToggleFavorite={handleToggleFavorite}
             />
@@ -572,6 +622,37 @@ export default function App() {
                 onReconnectGarageFile={handleReconnectGarageFile}
                 onUnlinkGarageFile={handleUnlinkGarageFile}
             />
+
+            {/* First-run / Post-wipe Relink Overlay */}
+            {garageFile.status === 'unlinked' &&
+                !initialLoad.hadSavedData &&
+                apexData.fleet.length === 0 &&
+                !isWelcomeDismissed && (
+                    <div className="garage-welcome-overlay" role="dialog" aria-modal="true" aria-labelledby="garageWelcomeTitle">
+                        <div className="garage-welcome-card">
+                            <span className="curator-tag-pill">LOCAL DISK SYNC</span>
+                            <h2 id="garageWelcomeTitle" className="garage-welcome-title">Open Your Garage File</h2>
+                            <p className="garage-welcome-sub">
+                                Point APEX to your <code>cars.json</code> file on this laptop to load your collection and save every change directly to disk.
+                            </p>
+                            <div className="garage-welcome-actions">
+                                <button type="button" className="btn-hud-primary garage-welcome-btn" onClick={handleOpenGarageFile}>
+                                    Open existing cars.json
+                                </button>
+                                <button type="button" className="btn-hud-secondary garage-welcome-btn" onClick={handleCreateGarageFile}>
+                                    Create new cars.json
+                                </button>
+                            </div>
+                            <button
+                                type="button"
+                                className="garage-welcome-skip"
+                                onClick={() => setIsWelcomeDismissed(true)}
+                            >
+                                Continue without linking a file
+                            </button>
+                        </div>
+                    </div>
+                )}
         </>
     );
 }
