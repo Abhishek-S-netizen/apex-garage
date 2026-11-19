@@ -100,31 +100,39 @@ body {
     box-shadow: none;
 }
 
-/* Modal and Drawer scrollbars */
+/* Modal, Drawer and Internal Stage scrollbars */
 .theme-drawer-body,
 .modal-card,
-.registry-table-wrap {
+.registry-table-wrap,
+.garage-grid-container,
+.libraries-split-grid {
     scrollbar-width: thin;
     scrollbar-color: rgba(189, 167, 148, 0.25) rgba(0, 0, 0, 0.25);
 }
 
 .theme-drawer-body::-webkit-scrollbar,
 .modal-card::-webkit-scrollbar,
-.registry-table-wrap::-webkit-scrollbar {
+.registry-table-wrap::-webkit-scrollbar,
+.garage-grid-container::-webkit-scrollbar,
+.libraries-split-grid::-webkit-scrollbar {
     width: 5px;
     height: 5px;
 }
 
 .theme-drawer-body::-webkit-scrollbar-track,
 .modal-card::-webkit-scrollbar-track,
-.registry-table-wrap::-webkit-scrollbar-track {
+.registry-table-wrap::-webkit-scrollbar-track,
+.garage-grid-container::-webkit-scrollbar-track,
+.libraries-split-grid::-webkit-scrollbar-track {
     background: rgba(0, 0, 0, 0.25);
     border-radius: 999px;
 }
 
 .theme-drawer-body::-webkit-scrollbar-thumb,
 .modal-card::-webkit-scrollbar-thumb,
-.registry-table-wrap::-webkit-scrollbar-thumb {
+.registry-table-wrap::-webkit-scrollbar-thumb,
+.garage-grid-container::-webkit-scrollbar-thumb,
+.libraries-split-grid::-webkit-scrollbar-thumb {
     background: rgba(189, 167, 148, 0.28);
     border-radius: 999px;
 }
@@ -145,17 +153,20 @@ body {
     display: none;
 }
 
-/* App Shell Container */
+/* App Shell Container: Pinned 100vh Viewport on Desktop */
 .app-shell {
     position: relative;
     z-index: 2;
     width: 100%;
     max-width: 1440px;
     margin: 0 auto;
-    padding: 58px 28px 104px;
+    padding: 50px 28px 24px;
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 16px;
     transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -390,6 +401,10 @@ body {
 .main-stage {
     position: relative;
     width: 100%;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
 }
 
 .view-panel {
@@ -398,7 +413,10 @@ body {
 }
 
 .view-panel.active {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
 }
 
 @keyframes panelFadeIn {
@@ -826,8 +844,10 @@ body {
 .unified-garage-stage {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 14px;
     width: 100%;
+    flex: 1;
+    min-height: 0;
 }
 
 .garage-header {
@@ -835,6 +855,7 @@ body {
     flex-direction: column;
     gap: 6px;
     margin-bottom: 2px;
+    flex-shrink: 0;
 }
 
 .garage-title-row {
@@ -865,8 +886,9 @@ body {
     flex-wrap: wrap;
     align-items: center;
     gap: 8px;
-    padding: 4px 0 10px;
+    padding: 4px 0 6px;
     margin-top: -6px;
+    flex-shrink: 0;
 }
 
 .garage-marque-pill {
@@ -918,11 +940,15 @@ body {
     transition: all 0.2s ease;
 }
 
-/* Direct Same-Page Grid View */
+/* Direct Same-Page Grid View: Internal Scrollable Stage */
 .garage-grid-container {
     display: flex;
     flex-direction: column;
-    padding-bottom: 120px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 6px;
+    padding-bottom: 130px;
 }
 
 /* Minimalist Spec List (Zero Card Aesthetic, Pure Subtle Separator Lines) */
@@ -1086,11 +1112,12 @@ body {
     border: none;
     border-radius: 0;
     padding: 0;
-    margin-bottom: 18px;
+    margin-bottom: 12px;
     box-shadow: none;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     flex-wrap: wrap;
+    flex-shrink: 0;
 }
 
 .curator-search-box {
@@ -2256,10 +2283,13 @@ body {
 .registry-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 16px;
+    flex: 1;
+    min-height: 0;
 }
 
 .registry-top-shelf {
+    flex-shrink: 0;
     background: #E1E1E1;
     border: none;
     border-radius: 8px;
@@ -2353,13 +2383,22 @@ body {
     background: #000000;
     border: 1px solid rgba(255, 255, 255, 0.10);
     border-radius: 8px;
-    padding: 10px 16px;
+    padding: 0 16px;
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.50);
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .registry-table-wrap {
     overflow-x: auto;
+    overflow-y: auto;
     width: 100%;
+    flex: 1;
+    min-height: 0;
+    padding-bottom: 90px;
 }
 
 .registry-table {
@@ -2381,6 +2420,10 @@ body {
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
     white-space: nowrap;
     text-transform: uppercase;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #000000;
 }
 
 .registry-table td {
@@ -2679,10 +2722,13 @@ body {
 .libraries-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 16px;
+    flex: 1;
+    min-height: 0;
 }
 
 .libraries-header {
+    flex-shrink: 0;
     background: #E1E1E1;
     border: none;
     border-radius: 8px;
@@ -2709,6 +2755,10 @@ body {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-bottom: 90px;
 }
 
 @media (max-width: 800px) {
@@ -4120,8 +4170,29 @@ body.zen-mode .macos-dock-header {
 
     /* 1. Shell & Safe Area Spacing (Notch / Dynamic Island Protection) */
     .app-shell {
+        height: auto;
+        max-height: none;
+        overflow: visible;
         padding: max(38px, env(safe-area-inset-top, 38px)) 14px calc(132px + env(safe-area-inset-bottom, 22px));
         gap: 14px;
+    }
+
+    .main-stage,
+    .view-panel,
+    .view-panel.active,
+    .unified-garage-stage,
+    .registry-wrapper,
+    .libraries-wrapper {
+        height: auto;
+        max-height: none;
+    }
+
+    .garage-grid-container,
+    .registry-table-card,
+    .registry-table-wrap,
+    .libraries-split-grid {
+        max-height: none;
+        overflow: visible;
     }
 
     /* 2. Substantial, Ergonomic Floating Luxury Capsule Dock (Thicker & Lifted) */
