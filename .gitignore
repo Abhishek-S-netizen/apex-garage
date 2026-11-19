@@ -27,3 +27,8 @@ dist-ssr
 .env
 .env.local
 .env.*.local
+
+# Local fleet database (private to laptop disk)
+cars.json
+cars.backup.json
+!cars.example.json
