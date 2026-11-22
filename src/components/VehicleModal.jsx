@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import CustomDropdown from './CustomDropdown';
-import { uploadVehiclePhoto, isSupabaseConfigured } from '../lib/supabase.js';
 
 export default function VehicleModal({
     isOpen,
@@ -16,33 +15,6 @@ export default function VehicleModal({
     const [scale, setScale] = useState('1:18');
     const [year, setYear] = useState('');
     const [isFavorite, setIsFavorite] = useState(false);
-    const [photoUrl, setPhotoUrl] = useState('');
-    const [showPhotoSection, setShowPhotoSection] = useState(false);
-    const [isUploading, setIsUploading] = useState(false);
-    const [uploadError, setUploadError] = useState('');
-    const fileInputRef = useRef(null);
-
-    const handleFileUpload = async (e) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        if (!isSupabaseConfigured()) {
-            setUploadError('Configure Supabase in .env to enable direct photo upload');
-            return;
-        }
-
-        setIsUploading(true);
-        setUploadError('');
-        try {
-            const cdnUrl = await uploadVehiclePhoto(file);
-            setPhotoUrl(cdnUrl);
-        } catch (err) {
-            console.error('Upload failed:', err);
-            setUploadError(err.message || 'Upload failed. Check Supabase storage settings.');
-        } finally {
-            setIsUploading(false);
-        }
-    };
 
     useEffect(() => {
         if (editCar) {
@@ -52,8 +24,6 @@ export default function VehicleModal({
             setScale(editCar.scale || '1:18');
             setYear(editCar.year || '');
             setIsFavorite(!!editCar.isFavorite);
-            setPhotoUrl(editCar.photoUrl || '');
-            setShowPhotoSection(Boolean(editCar.photoUrl));
         } else {
             setModel('');
             setBrand(brands[0] || 'Porsche');
@@ -61,8 +31,6 @@ export default function VehicleModal({
             setScale('1:18');
             setYear('');
             setIsFavorite(false);
-            setPhotoUrl('');
-            setShowPhotoSection(false);
         }
     }, [editCar, brands, makers, isOpen]);
 
@@ -77,16 +45,7 @@ export default function VehicleModal({
             maker,
             scale,
             year: Number(year) || null,
-            isFavorite,
-            photoUrl: photoUrl.trim() || '',
-            livery: editCar?.livery || '',
-            condition: editCar?.condition || 'Mint in Box',
-            purchasePrice: editCar?.purchasePrice || 0,
-            estimatedValue: editCar?.estimatedValue || 0,
-            acquiredDate: editCar?.acquiredDate || new Date().toISOString().substring(0, 10),
-            chassisNo: editCar?.chassisNo || '',
-            notes: editCar?.notes || '',
-            createdAt: editCar?.createdAt || Date.now()
+            isFavorite
         });
         onClose();
     };
@@ -190,104 +149,6 @@ export default function VehicleModal({
                                 <span className="apple-switch-thumb" />
                             </button>
                         </div>
-                    </div>
-
-                    {/* Section 2: Optional Photograph (Collapsed by default for rapid registration) */}
-                    <div className="apple-form-section" style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '14px' }}>
-                        {!showPhotoSection ? (
-                            <button
-                                type="button"
-                                className="apple-optional-toggle-btn"
-                                onClick={() => setShowPhotoSection(true)}
-                                style={{
-                                    width: '100%',
-                                    padding: '10px 14px',
-                                    borderRadius: '10px',
-                                    background: 'rgba(255, 255, 255, 0.03)',
-                                    border: '1px dashed var(--border-subtle)',
-                                    color: 'var(--text-tertiary)',
-                                    fontSize: '11px',
-                                    fontFamily: 'Plus Jakarta Sans, sans-serif',
-                                    letterSpacing: '0.04em',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '8px',
-                                    transition: 'all 0.2s ease'
-                                }}
-                            >
-                                <span>📷</span>
-                                <span>+ Add Photo / Media (Optional)</span>
-                            </button>
-                        ) : (
-                            <>
-                                <div className="apple-section-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                    <span className="apple-section-title">PHOTOGRAPHY & MEDIA URL (OPTIONAL)</span>
-                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                        <button
-                                            type="button"
-                                            className="apple-upload-trigger-btn"
-                                            onClick={() => fileInputRef.current?.click()}
-                                            disabled={isUploading}
-                                            title="Upload from camera roll or take photo"
-                                        >
-                                            {isUploading ? 'Uploading...' : 'Upload / Camera'}
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                setShowPhotoSection(false);
-                                                setPhotoUrl('');
-                                            }}
-                                            style={{
-                                                background: 'none',
-                                                border: 'none',
-                                                color: 'var(--text-tertiary)',
-                                                fontSize: '11px',
-                                                cursor: 'pointer'
-                                            }}
-                                        >
-                                            Hide
-                                        </button>
-                                    </div>
-                                    <input
-                                        ref={fileInputRef}
-                                        type="file"
-                                        accept="image/*"
-                                        style={{ display: 'none' }}
-                                        onChange={handleFileUpload}
-                                    />
-                                </div>
-
-                                <div className="form-group" style={{ marginTop: '8px' }}>
-                                    <input
-                                        type="url"
-                                        className="form-input apple-input"
-                                        placeholder="Paste image URL, or tap 'Upload / Camera'..."
-                                        value={photoUrl}
-                                        onChange={(e) => setPhotoUrl(e.target.value)}
-                                    />
-
-                                    {uploadError && (
-                                        <p style={{ fontSize: '11px', color: 'var(--accent-bright)', marginTop: '2px' }}>
-                                            {uploadError}
-                                        </p>
-                                    )}
-
-                                    {photoUrl && (
-                                        <div className="photo-preview-box apple-photo-preview" style={{ marginTop: '10px' }}>
-                                            <img
-                                                src={photoUrl}
-                                                alt="Vehicle Preview"
-                                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                                onError={(e) => { e.target.style.display = 'none'; }}
-                                            />
-                                        </div>
-                                    )}
-                                </div>
-                            </>
-                        )}
                     </div>
 
                     <div className="modal-actions apple-modal-actions">

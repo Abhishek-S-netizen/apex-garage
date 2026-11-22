@@ -6,25 +6,6 @@ import path from 'path';
 function apexDiskSyncPlugin() {
   const dbFile = path.resolve(__dirname, 'cars.json');
   const backupFile = path.resolve(__dirname, 'cars.backup.json');
-  const publicDir = path.resolve(__dirname, 'public');
-  const artifactIconPath = 'C:/Users/Acer/.gemini/antigravity-ide/brain/d246175c-8bf3-401b-a37a-fa3611fda7b5/apex_chevron_icon_1791726220671.jpg';
-
-  // Automatically ensure PWA PNG icon files are present in public directory
-  if (fs.existsSync(artifactIconPath) && fs.existsSync(publicDir)) {
-    try {
-      const icon512 = path.join(publicDir, 'icon-512.png');
-      const icon192 = path.join(publicDir, 'icon-192.png');
-      const appleTouch = path.join(publicDir, 'apple-touch-icon.png');
-      const favicon = path.join(publicDir, 'favicon.png');
-
-      if (!fs.existsSync(icon512)) fs.copyFileSync(artifactIconPath, icon512);
-      if (!fs.existsSync(icon192)) fs.copyFileSync(artifactIconPath, icon192);
-      if (!fs.existsSync(appleTouch)) fs.copyFileSync(artifactIconPath, appleTouch);
-      if (!fs.existsSync(favicon)) fs.copyFileSync(artifactIconPath, favicon);
-    } catch (e) {
-      console.warn('[APEX Icons] Notice:', e.message);
-    }
-  }
 
   return {
     name: 'apex-disk-sync',

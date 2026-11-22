@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { DEFAULT_APEX_DATA } from './data/initialData.js';
-import { useApexTheme } from './theme/themeEngine.js';
 import {
     isFileAccessSupported,
     getStoredHandle,
@@ -17,7 +16,6 @@ import MacDock from './components/MacDock.jsx';
 import Showroom from './components/Showroom.jsx';
 import Registry from './components/Registry.jsx';
 import Libraries from './components/Libraries.jsx';
-import ThemeDrawer from './components/ThemeDrawer.jsx';
 import VehicleModal from './components/VehicleModal.jsx';
 import DossierModal from './components/DossierModal.jsx';
 
@@ -36,9 +34,6 @@ export function sanitizeCar(car, index = 0) {
 }
 
 export default function App() {
-    // Theme Engine
-    const { themeState, tokens, updateTheme, resetTheme } = useApexTheme();
-
     // Primary Collection State (Laptop disk cars.json is the master database)
     // Browser storage is only a fast preview / safety copy.
     const [initialLoad] = useState(() => {
@@ -77,7 +72,6 @@ export default function App() {
 
     const [activeView, setActiveView] = useState('showroom');
     const [isZenMode, setIsZenMode] = useState(false);
-    const [isStudioOpen, setIsStudioOpen] = useState(false);
 
     // Modal states
     const [isCarModalOpen, setIsCarModalOpen] = useState(false);
@@ -161,14 +155,6 @@ export default function App() {
             }).catch(() => { });
         }
     }, [writeToLinkedFile]);
-
-    const handleUpdateTheme = useCallback((updates) => {
-        updateTheme(updates);
-    }, [updateTheme]);
-
-    const handleResetTheme = useCallback(() => {
-        resetTheme();
-    }, [resetTheme]);
 
     // Read the linked file into the app (or seed it if it's brand new / empty)
     const loadFromLinkedFile = async (handle) => {
@@ -330,17 +316,12 @@ export default function App() {
                     setIsCarModalOpen(true);
                     break;
                 }
-                case 't':
-                    e.preventDefault();
-                    setIsStudioOpen(prev => !prev);
-                    break;
                 case 'z':
                     setIsZenMode(prev => !prev);
                     break;
                 case 'escape':
                     setIsCarModalOpen(false);
                     setIsDossierOpen(false);
-                    setIsStudioOpen(false);
                     break;
                 default:
                     break;
@@ -527,7 +508,6 @@ export default function App() {
                 <MacDock
                     activeView={activeView}
                     setActiveView={setActiveView}
-                    onOpenStudio={() => setIsStudioOpen(true)}
                     onAddCar={() => runIfEditable(() => {
                         setEditCarId(null);
                         setIsCarModalOpen(true);
@@ -568,6 +548,10 @@ export default function App() {
                         onToggleFavorite={(carId) => handleToggleFavorite(carId)}
                         onExportJSON={handleExportJSON}
                         onImportJSON={handleImportJSON}
+                        garageFile={garageFile}
+                        onCreateGarageFile={handleCreateGarageFile}
+                        onOpenGarageFile={handleOpenGarageFile}
+                        onReconnectGarageFile={handleReconnectGarageFile}
                     />
 
                     <Libraries
@@ -602,25 +586,6 @@ export default function App() {
                 })}
                 onDelete={handleDeleteCar}
                 onToggleFavorite={handleToggleFavorite}
-            />
-
-            <ThemeDrawer
-                isOpen={isStudioOpen}
-                onClose={() => setIsStudioOpen(false)}
-                themeState={themeState}
-                tokens={tokens}
-                updateTheme={handleUpdateTheme}
-                onUpdateTheme={handleUpdateTheme}
-                resetTheme={handleResetTheme}
-                onResetTheme={handleResetTheme}
-                onExportBackup={handleExportJSON}
-                onImportData={handleImportJSON}
-                apexData={apexData}
-                garageFile={garageFile}
-                onCreateGarageFile={handleCreateGarageFile}
-                onOpenGarageFile={handleOpenGarageFile}
-                onReconnectGarageFile={handleReconnectGarageFile}
-                onUnlinkGarageFile={handleUnlinkGarageFile}
             />
 
             {/* First-run / Post-wipe Relink Overlay */}

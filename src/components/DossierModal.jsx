@@ -16,22 +16,15 @@ export default function DossierModal({
                 <button className="modal-close-btn" onClick={onClose} type="button">✕</button>
 
                 <div className="dossier-layout">
-                    {/* Left: Hero Image or Precision Chassis Plaque */}
+                    {/* Left: Precision Chassis Plaque */}
                     <div className="dossier-hero-col">
                         <div className="dossier-hero-wrap">
-                            {car.photoUrl ? (
-                                <img
-                                    src={car.photoUrl}
-                                    alt={car.model}
-                                />
-                            ) : (
-                                <div className="dossier-spec-plaque">
-                                    <span className="dossier-plaque-marque">{(car.brand || 'ATELIER').toUpperCase()}</span>
-                                    <h3 className="dossier-plaque-title">{car.model}</h3>
-                                    <span className="dossier-plaque-maker">{car.maker || 'PRECISION DIECAST'}</span>
-                                    <span className="dossier-plaque-scale">{car.scale || '1:18'}</span>
-                                </div>
-                            )}
+                            <div className="dossier-spec-plaque">
+                                <span className="dossier-plaque-marque">{(car.brand || 'ATELIER').toUpperCase()}</span>
+                                <h3 className="dossier-plaque-title">{car.model}</h3>
+                                <span className="dossier-plaque-maker">{car.maker || 'PRECISION DIECAST'}</span>
+                                <span className="dossier-plaque-scale">{car.scale || '1:18'}</span>
+                            </div>
                             <div className="dossier-hero-badges">
                                 <span className="dossier-scale-pill">{car.scale || '1:18'}</span>
                             </div>
@@ -43,7 +36,6 @@ export default function DossierModal({
                         <div className="dossier-header-block">
                             <span className="dossier-brand-tag">{(car.brand || 'CAR').toUpperCase()}</span>
                             <h2 className="dossier-model-title">{car.model}</h2>
-                            {car.livery && <p className="dossier-livery-sub">{car.livery}</p>}
                         </div>
 
                         <div className="dossier-specs-table">
@@ -65,12 +57,6 @@ export default function DossierModal({
                                     {car.isFavorite ? '★ Pinned Favorite' : 'Fleet Registered'}
                                 </span>
                             </div>
-                            {car.notes && (
-                                <div className="dossier-spec-row" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '4px', paddingTop: '4px' }}>
-                                    <span className="spec-k">COLLECTOR NOTES</span>
-                                    <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.4' }}>{car.notes}</p>
-                                </div>
-                            )}
                         </div>
 
                         <div className="dossier-actions-bar">

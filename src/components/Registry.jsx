@@ -8,9 +8,23 @@ export default function Registry({
     onAddCar,
     onToggleFavorite,
     onExportJSON,
-    onImportJSON
+    onImportJSON,
+    garageFile = { status: 'unsupported', name: null },
+    onCreateGarageFile = () => { },
+    onOpenGarageFile = () => { },
+    onReconnectGarageFile = () => { }
 }) {
     const importInputRef = useRef(null);
+
+    const handleFilePillClick = () => {
+        if (garageFile.status === 'needs-permission' || garageFile.status === 'error') {
+            onReconnectGarageFile();
+        } else if (garageFile.status === 'linked') {
+            onOpenGarageFile();
+        } else if (garageFile.status === 'unlinked') {
+            onCreateGarageFile();
+        }
+    };
 
     return (
         <section className={`view-panel ${activeView === 'registry' ? 'active' : ''}`} id="viewRegistry">
@@ -24,6 +38,27 @@ export default function Registry({
                         </p>
                     </div>
                     <div className="registry-actions">
+                        {garageFile.status !== 'unsupported' && garageFile.status !== 'checking' && (
+                            <button
+                                type="button"
+                                className={`registry-file-pill status-${garageFile.status}`}
+                                onClick={handleFilePillClick}
+                                title={
+                                    garageFile.status === 'linked'
+                                        ? `Saving to ${garageFile.name} — click to switch file`
+                                        : garageFile.status === 'unlinked'
+                                            ? 'Click to create and link cars.json on your disk'
+                                            : `Click to reconnect ${garageFile.name}`
+                                }
+                            >
+                                <span className={`garage-file-dot status-${garageFile.status}`} />
+                                <span>
+                                    {garageFile.status === 'linked' && garageFile.name}
+                                    {garageFile.status === 'unlinked' && 'Link cars.json'}
+                                    {(garageFile.status === 'needs-permission' || garageFile.status === 'error') && `Reconnect ${garageFile.name}`}
+                                </span>
+                            </button>
+                        )}
                         <button
                             type="button"
                             className="btn-hud-secondary"

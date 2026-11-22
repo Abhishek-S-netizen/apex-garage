@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 
 // Brand Racing Heritage Accent Colors
 const BRAND_HERITAGE_ACCENTS = {
@@ -56,13 +56,22 @@ export default function Showroom({
         return { sortedBrands: sorted, marqueCounts: counts };
     }, [filteredFleet]);
 
-    // Displayed fleet grouped by marque
+    // Auto-select the first marque so the right pane isn't empty on load
+    useEffect(() => {
+        if (sortedBrands.length === 0) return;
+        const stillExists = selectedMarque && sortedBrands.some(b => b.toLowerCase() === selectedMarque.toLowerCase());
+        if (!stillExists) {
+            setSelectedMarque(sortedBrands[0]);
+        }
+    }, [sortedBrands, selectedMarque]);
+
+    // Displayed fleet grouped by marque (search spans all marques)
     const displayedGroups = useMemo(() => {
         if (!selectedMarque && !searchQuery) {
             return [];
         }
 
-        const activeBrands = !selectedMarque
+        const activeBrands = (searchQuery || !selectedMarque)
             ? sortedBrands
             : sortedBrands.filter(b => b.toLowerCase() === selectedMarque.toLowerCase());
 
@@ -127,103 +136,105 @@ export default function Showroom({
                     </div>
                 </div>
 
-                {/* Minimalist Horizontal Marque Filter Buttons */}
-                <div className="garage-marque-pills-bar">
-                    {sortedBrands.map(brand => {
-                        const count = marqueCounts[brand] || 0;
-                        const isActive = selectedMarque && selectedMarque.toLowerCase() === brand.toLowerCase();
-                        return (
-                            <button
-                                key={brand}
-                                type="button"
-                                className={`garage-marque-pill ${isActive ? 'active' : ''}`}
-                                onClick={() => setSelectedMarque(isActive ? null : brand)}
-                            >
-                                <span>{brand.toUpperCase()}</span>
-                                <span className="pill-count">{count}</span>
-                            </button>
-                        );
-                    })}
-                </div>
-
-                {/* Direct Same-Page Grid View */}
-                <div className="garage-grid-container">
-                    {!selectedMarque && !searchQuery ? (
-                        <div className="garage-prompt-state">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.35, marginBottom: '6px' }}>
-                                <path d="M12 19V5M5 12l7-7 7 7" />
-                            </svg>
-                            <p className="garage-prompt-msg">Click a pill to view cars</p>
-                        </div>
-                    ) : displayedGroups.length === 0 ? (
-                        <div className="garage-empty-state">
-                            <p>No vehicles match your active search or filters.</p>
-                            <button
-                                type="button"
-                                className="garage-clear-btn"
-                                onClick={() => {
-                                    setSearchQuery('');
-                                    setScaleFilter('all');
-                                    setSelectedMarque(null);
-                                }}
-                            >
-                                Reset All Filters
-                            </button>
-                        </div>
-                    ) : (
-                        displayedGroups.map(group => {
-                            const accent = BRAND_HERITAGE_ACCENTS[group.brand] || '#BDA794';
+                {/* Split Stage: Left Marque Sidebar + Right Cars Table */}
+                <div className="garage-split-stage">
+                    <div className="garage-marque-pills-bar" aria-label="Marque filter">
+                        {sortedBrands.map(brand => {
+                            const count = marqueCounts[brand] || 0;
+                            const isActive = selectedMarque && selectedMarque.toLowerCase() === brand.toLowerCase();
                             return (
-                                <div className="pavilion-brand-section" key={group.brand}>
-                                    {/* Brand Header Line */}
-                                    <div className="pavilion-brand-header">
-                                        <div className="pavilion-brand-title-wrap">
-                                            <span
-                                                className="pavilion-brand-accent-line"
-                                                style={{ background: accent }}
-                                            />
-                                            <h3 className="pavilion-brand-heading">{group.brand.toUpperCase()}</h3>
-                                            <span className="pavilion-brand-badge">
-                                                {group.cars.length} {group.cars.length === 1 ? 'MODEL' : 'MODELS'}
-                                            </span>
-                                        </div>
-                                    </div>
+                                <button
+                                    key={brand}
+                                    type="button"
+                                    className={`garage-marque-pill ${!searchQuery && isActive ? 'active' : ''}`}
+                                    onClick={() => {
+                                        setSearchQuery('');
+                                        setSelectedMarque(brand);
+                                    }}
+                                >
+                                    <span>{brand.toUpperCase()}</span>
+                                    <span className="pill-count">{count}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
 
-                                    {/* Vehicles List (Subtle Separator Lines, Zero Card Aesthetic) */}
-                                    <div className="garage-cars-list">
-                                        {group.cars.map(car => (
-                                            <div key={car.id} className="garage-spec-row">
-                                                <div className="garage-row-left">
-                                                    <span className="garage-row-scale">{car.scale || '1:64'}</span>
-                                                    <div className="garage-row-details">
-                                                        <h4 className="garage-row-model">{car.model}</h4>
-                                                        <span className="garage-row-specs">
-                                                            {car.maker && <span>{car.maker}</span>}
-                                                            {car.maker && car.year && <span className="garage-row-sep">/</span>}
-                                                            {car.year && <span>{car.year}</span>}
-                                                        </span>
+                    {/* Direct Same-Page Grid View */}
+                    <div className="garage-grid-container">
+                        {!selectedMarque && !searchQuery ? (
+                            <div className="garage-prompt-state">
+                                <p className="garage-prompt-msg">Select a marque to view cars</p>
+                            </div>
+                        ) : displayedGroups.length === 0 ? (
+                            <div className="garage-empty-state">
+                                <p>No vehicles match your active search or filters.</p>
+                                <button
+                                    type="button"
+                                    className="garage-clear-btn"
+                                    onClick={() => {
+                                        setSearchQuery('');
+                                        setScaleFilter('all');
+                                        setSelectedMarque(null);
+                                    }}
+                                >
+                                    Reset All Filters
+                                </button>
+                            </div>
+                        ) : (
+                            displayedGroups.map(group => {
+                                const accent = BRAND_HERITAGE_ACCENTS[group.brand] || '#BDA794';
+                                return (
+                                    <div className="pavilion-brand-section" key={group.brand}>
+                                        {/* Brand Header Line */}
+                                        <div className="pavilion-brand-header">
+                                            <div className="pavilion-brand-title-wrap">
+                                                <span
+                                                    className="pavilion-brand-accent-line"
+                                                    style={{ background: accent }}
+                                                />
+                                                <h3 className="pavilion-brand-heading">{group.brand.toUpperCase()}</h3>
+                                                <span className="pavilion-brand-badge">
+                                                    {group.cars.length} {group.cars.length === 1 ? 'MODEL' : 'MODELS'}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* Vehicles List (Subtle Separator Lines, Zero Card Aesthetic) */}
+                                        <div className="garage-cars-list">
+                                            {group.cars.map(car => (
+                                                <div key={car.id} className="garage-spec-row">
+                                                    <div className="garage-row-left">
+                                                        <span className="garage-row-scale">{car.scale || '1:64'}</span>
+                                                        <div className="garage-row-details">
+                                                            <h4 className="garage-row-model">{car.model}</h4>
+                                                            <span className="garage-row-specs">
+                                                                {car.maker && <span>{car.maker}</span>}
+                                                                {car.maker && car.year && <span className="garage-row-sep">/</span>}
+                                                                {car.year && <span>{car.year}</span>}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="garage-row-right">
+                                                        <button
+                                                            type="button"
+                                                            className={`garage-row-fav ${car.isFavorite ? 'active' : ''}`}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                onToggleFavorite && onToggleFavorite(car.id);
+                                                            }}
+                                                            title="Toggle Favorite"
+                                                        >
+                                                            ★
+                                                        </button>
                                                     </div>
                                                 </div>
-                                                <div className="garage-row-right">
-                                                    <button
-                                                        type="button"
-                                                        className={`garage-row-fav ${car.isFavorite ? 'active' : ''}`}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            onToggleFavorite && onToggleFavorite(car.id);
-                                                        }}
-                                                        title="Toggle Favorite"
-                                                    >
-                                                        ★
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        ))}
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
-                            );
-                        })
-                    )}
+                                );
+                            })
+                        )}
+                    </div>
                 </div>
             </div>
         </section>
