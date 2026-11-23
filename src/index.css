@@ -565,7 +565,6 @@ body {
     flex: 1;
     min-height: 0;
     width: 100%;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* Marque Filter Sidebar on Desktop, Horizontal Swipe on Mobile */
@@ -1222,8 +1221,10 @@ body {
 }
 
 .libraries-header .registry-title {
+    font-family: 'Jura', var(--font-mono), sans-serif;
     color: #000000;
-    font-weight: 800;
+    font-weight: 700;
+    margin: 0;
 }
 
 .libraries-header .registry-sub {
@@ -1409,7 +1410,7 @@ body {
 
 .modal-card {
     background: #171717;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: none;
     border-radius: 20px;
     padding: 22px 28px;
     box-shadow: 0 24px 70px rgba(0, 0, 0, 0.75);
@@ -1600,7 +1601,7 @@ body {
 
 .apple-input {
     background: rgba(0, 0, 0, 0.45) !important;
-    border: 1px solid rgba(189, 167, 148, 0.18) !important;
+    border: none !important;
     border-radius: 12px !important;
     padding: 9px 14px !important;
     font-family: var(--font-body) !important;
@@ -1632,7 +1633,7 @@ body {
     align-items: center;
     justify-content: space-between;
     background: rgba(0, 0, 0, 0.45);
-    border: 1px solid rgba(189, 167, 148, 0.2);
+    border: none;
     border-radius: 12px;
     padding: 9px 14px;
     font-family: var(--font-body);

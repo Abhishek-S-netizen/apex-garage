@@ -34,11 +34,7 @@ export default function Libraries({
         <section className={`view-panel ${activeView === 'libraries' ? 'active' : ''}`} id="viewLibraries">
             <div className="libraries-wrapper">
                 <div className="libraries-header">
-                    <span className="bento-tag">STANDARDIZED LIBRARIES</span>
                     <h2 className="registry-title">Brands & Manufacturers</h2>
-                    <p className="registry-sub">
-                        Standardize your database. Add, rename, or purge vehicle brands and model makers globally.
-                    </p>
                 </div>
 
                 <div className="libraries-split-grid">
