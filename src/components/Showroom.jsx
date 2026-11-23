@@ -66,7 +66,6 @@ export default function Showroom({
             <div className="unified-garage-stage">
                 {/* Header */}
                 <div className="garage-header">
-                    <div className="curator-tag-pill">PRIVATE ATELIER SHOWCASE</div>
                     <div className="garage-title-row">
                         <h2 className="curator-hero-title">
                             <span>THE SHOWROOM</span>
