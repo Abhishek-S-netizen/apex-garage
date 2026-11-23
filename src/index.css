@@ -2357,13 +2357,14 @@ body.zen-mode .macos-dock-header {
 }
 
 .dock-file-btn.status-linked {
-    background: #1B5E3A;
-    border-color: rgba(255, 255, 255, 0.22);
+    background: #171717;
+    border-color: #171717;
     color: #FFFFFF;
 }
 
 .dock-file-btn.status-linked:hover {
-    background: #144A2D;
+    background: #000000;
+    border-color: #000000;
     color: #FFFFFF;
 }
 
