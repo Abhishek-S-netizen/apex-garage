@@ -270,11 +270,7 @@ body {
 .dock-item:hover {
     color: #000000;
     background: rgba(0, 0, 0, 0.08);
-    transform: translateY(-2px) scale(1.04);
-}
-
-.dock-item:hover .dock-icon-box {
-    transform: scale(1.08);
+    transform: translateY(-2px);
 }
 
 /* Active Selected Item: Solid #171717 with #E1E1E1 Icon */
@@ -344,7 +340,7 @@ body {
 .dock-register-btn:hover {
     background: #000000;
     color: #FFFFFF;
-    transform: translateY(-2px) scale(1.05);
+    transform: translateY(-2px);
     box-shadow: none;
 }
 
