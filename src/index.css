@@ -901,13 +901,13 @@ body {
 
 .pavilion-brand-badge {
     font-family: var(--font-mono);
-    font-size: 9.5px;
+    font-size: 10px;
     font-weight: 700;
     color: #E95532;
-    background: rgba(233, 85, 50, 0.12);
-    border: 1px solid rgba(233, 85, 50, 0.45);
-    padding: 2px 8px;
-    border-radius: 4px;
+    background: transparent;
+    border: none;
+    padding: 0;
+    border-radius: 0;
 }
 
 /* ══════════════════════════════════════════════════════════════════
@@ -1415,7 +1415,7 @@ body {
     padding: 22px 28px;
     box-shadow: 0 24px 70px rgba(0, 0, 0, 0.75);
     max-height: 90vh;
-    overflow-y: auto;
+    overflow: visible;
     position: relative;
     color: #FFFFFF;
     animation: modalCardScaleIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
@@ -2357,13 +2357,13 @@ body.zen-mode .macos-dock-header {
 }
 
 .dock-file-btn.status-linked {
-    background: #348C5E;
-    border-color: rgba(0, 0, 0, 0.16);
+    background: #217346;
+    border-color: rgba(0, 0, 0, 0.2);
     color: #111111;
 }
 
 .dock-file-btn.status-linked:hover {
-    background: #2B7A50;
+    background: #1A5C38;
     color: #111111;
 }
 
