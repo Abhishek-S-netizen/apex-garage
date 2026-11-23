@@ -36,10 +36,10 @@ export default function MacDock({
                     />
                     <path
                         d="M9.6 8h4.2l1.9 3.5H7.7l1.9-3.5z"
-                        fill="#2C3752"
+                        fill="#171717"
                     />
-                    <circle cx="7" cy="16.4" r="2.1" fill="#2C3752" stroke="#E1E1E1" strokeWidth="1.6" />
-                    <circle cx="17" cy="16.4" r="2.1" fill="#2C3752" stroke="#E1E1E1" strokeWidth="1.6" />
+                    <circle cx="7" cy="16.4" r="2.1" fill="#171717" stroke="#E1E1E1" strokeWidth="1.6" />
+                    <circle cx="17" cy="16.4" r="2.1" fill="#171717" stroke="#E1E1E1" strokeWidth="1.6" />
                 </svg>
             ) : (
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">

@@ -277,12 +277,12 @@ body {
     transform: scale(1.08);
 }
 
-/* Active Selected Item: Solid #2C3752 Twilight Slate with #E1E1E1 Icon */
+/* Active Selected Item: Solid #171717 with #E1E1E1 Icon */
 .dock-item.active {
-    background: #2C3752;
-    border-color: #2C3752;
+    background: #171717;
+    border-color: #171717;
     color: #E1E1E1;
-    box-shadow: 0 4px 12px rgba(44, 55, 82, 0.45);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
 }
 
 .dock-item.active .dock-icon-box {
@@ -324,7 +324,7 @@ body {
 }
 
 .dock-register-btn {
-    background: #2C3752;
+    background: #171717;
     color: #FFFFFF;
     border: none;
     font-family: var(--font-mono);
@@ -342,7 +342,7 @@ body {
 }
 
 .dock-register-btn:hover {
-    background: #3B496B;
+    background: #000000;
     color: #FFFFFF;
     transform: translateY(-2px) scale(1.05);
     box-shadow: none;
