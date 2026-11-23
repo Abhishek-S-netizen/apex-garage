@@ -9,6 +9,19 @@ A fast, minimalist React + Vite web app for cataloging a diecast model car colle
 - **Local Disk Sync (`cars.json`)**: Uses the browser's File System Access API to read from and auto-save directly to a `cars.json` file on your laptop, plus one-click JSON **Import** / **Export** backups.
 - **Keyboard Shortcuts**: `1` (Showroom), `2` (Libraries), `N` (New Vehicle), `Esc` (Close modal).
 
+---
+
+| Showroom | Library |
+|----------|---------|
+| ![](screenshots/showroom.png) | ![](screenshots/library.png) |
+
+---
+
+| Registering a model | Editing a model |
+|----------|---------|
+| ![](screenshots/register_car.png) | ![](screenshots/edit_car.png) |
+
+
 ## Getting Started
 ```bash
 npm install
