@@ -559,7 +559,7 @@ body {
 /* Split Stage on Desktop: Left Marque Sidebar + Right Scrollable Car List */
 .garage-split-stage {
     display: flex;
-    gap: 20px;
+    gap: 38px;
     flex: 1;
     min-height: 0;
     width: 100%;
@@ -574,7 +574,7 @@ body {
     width: 210px;
     flex-shrink: 0;
     overflow-y: auto;
-    padding: 0 10px 130px 0;
+    padding: 0 14px 130px 0;
     margin-top: 0;
     border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
@@ -1401,11 +1401,11 @@ body {
 }
 
 .modal-card {
-    background: #20262C;
+    background: #171717;
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 20px;
     padding: 22px 28px;
-    box-shadow: 0 24px 70px rgba(16, 26, 34, 0.65), 0 0 24px rgba(71, 199, 252, 0.12);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.75);
     max-height: 90vh;
     overflow-y: auto;
     position: relative;
@@ -1835,9 +1835,9 @@ body {
 }
 
 .btn-modal-cancel {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(189, 167, 148, 0.2);
-    color: var(--text-secondary);
+    background: #E1E1E1;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #111111;
     font-family: var(--font-mono);
     font-size: 11px;
     font-weight: 700;
@@ -1849,14 +1849,14 @@ body {
 }
 
 .btn-modal-cancel:hover {
-    background: rgba(255, 255, 255, 0.12);
-    color: #FFFFFF;
+    background: #FFFFFF;
+    color: #000000;
 }
 
 .btn-modal-save {
-    background: #BDA794;
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    color: #1A1819;
+    background: #1550F0;
+    border: 1px solid #1550F0;
+    color: #FFFFFF;
     font-family: var(--font-mono);
     font-size: 11.5px;
     font-weight: 700;
@@ -1864,14 +1864,15 @@ body {
     padding: 9px 24px;
     border-radius: 999px;
     cursor: pointer;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    box-shadow: none;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-modal-save:hover {
-    background: #FFFFFF;
+    background: #103FBD;
+    border-color: #103FBD;
     transform: translateY(-1px);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+    box-shadow: none;
 }
 
 .modal-actions {
@@ -2347,17 +2348,29 @@ body.zen-mode .macos-dock-header {
     transform: translateY(-2px);
 }
 
-.dock-file-btn {
-    gap: 5px;
-    width: auto;
-    padding: 0 10px;
+.dock-file-btn.status-linked {
+    background: #348C5E;
+    border-color: rgba(255, 255, 255, 0.22);
+    color: #FFFFFF;
+}
+
+.dock-file-btn.status-linked:hover {
+    background: #2B7A50;
+    color: #FFFFFF;
+}
+
+.dock-file-btn.status-needs-permission,
+.dock-file-btn.status-error {
+    background: rgba(255, 193, 7, 0.28);
+    border-color: rgba(255, 193, 7, 0.55);
 }
 
 /* Showroom Row Edit Action */
 .garage-row-edit {
     background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #E95532;
+    opacity: 0.78;
     width: 30px;
     height: 30px;
     border-radius: 8px;
@@ -2368,20 +2381,20 @@ body.zen-mode .macos-dock-header {
     transition: all 0.18s ease;
 }
 
-.garage-row-spec:hover .garage-row-edit,
 .garage-spec-row:hover .garage-row-edit,
 .garage-row-edit:hover {
-    color: #FFFFFF;
-    border-color: rgba(189, 167, 148, 0.45);
-    background: rgba(255, 255, 255, 0.08);
+    color: #E95532;
+    opacity: 1;
+    border-color: rgba(233, 85, 50, 0.45);
+    background: transparent;
 }
 
 /* VehicleModal Delete Button */
 .btn-modal-delete {
     margin-right: auto;
-    background: rgba(255, 59, 48, 0.12);
-    border: 1px solid rgba(255, 59, 48, 0.35);
-    color: #FF6B63;
+    background: #E95532;
+    border: 1px solid #E95532;
+    color: #FFFFFF;
     padding: 9px 20px;
     border-radius: 999px;
     font-family: var(--font-mono);
@@ -2393,7 +2406,7 @@ body.zen-mode .macos-dock-header {
 }
 
 .btn-modal-delete:hover {
-    background: rgba(255, 59, 48, 0.24);
-    border-color: rgba(255, 59, 48, 0.65);
+    background: #D44726;
+    border-color: #D44726;
     color: #FFFFFF;
 }
