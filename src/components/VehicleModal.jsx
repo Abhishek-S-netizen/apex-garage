@@ -63,76 +63,67 @@ export default function VehicleModal({
             <div className="modal-card modal-lg apple-modal-sheet">
                 <button className="modal-close-btn" onClick={onClose} type="button" aria-label="Close modal">✕</button>
                 <div className="modal-header">
-                    <span className="modal-tag">{editCar ? 'MODIFY TELEMETRY' : 'ATELIER REGISTRY'}</span>
-                    <h3 className="modal-title">{editCar ? 'Edit Vehicle Dossier' : 'Register New Vehicle'}</h3>
+                    <h3 className="modal-title">{editCar ? 'Edit Vehicle' : 'Register New Vehicle'}</h3>
                 </div>
 
                 <form className="modal-form apple-modal-form" onSubmit={handleSubmit}>
-                    {/* Section 1: Vehicle Identity & Hardware */}
-                    <div className="apple-form-section" style={{ position: 'relative', zIndex: 30 }}>
-                        <div className="apple-section-header">
-                            <span className="apple-section-title">CHASSIS & HARDWARE SPECIFICATION</span>
+                    <div className="form-grid-2" style={{ position: 'relative', zIndex: 35 }}>
+                        <div className="form-group">
+                            <label className="form-label">Model Name</label>
+                            <input
+                                type="text"
+                                className="form-input apple-input"
+                                placeholder="e.g. 911 (992) GT3 RS Weissach"
+                                value={model}
+                                onChange={(e) => setModel(e.target.value)}
+                                required
+                            />
                         </div>
 
-                        <div className="form-grid-2">
-                            <div className="form-group">
-                                <label className="form-label">Model Name</label>
-                                <input
-                                    type="text"
-                                    className="form-input apple-input"
-                                    placeholder="e.g. 911 (992) GT3 RS Weissach"
-                                    value={model}
-                                    onChange={(e) => setModel(e.target.value)}
-                                    required
-                                />
-                            </div>
+                        <div className="form-group" style={{ position: 'relative', zIndex: 35 }}>
+                            <label className="form-label">Automobile Marque</label>
+                            <CustomDropdown
+                                value={brand}
+                                onChange={setBrand}
+                                options={brands}
+                                placeholder="Select Marque..."
+                            />
+                        </div>
+                    </div>
 
-                            <div className="form-group" style={{ position: 'relative', zIndex: 35 }}>
-                                <label className="form-label">Automobile Marque</label>
-                                <CustomDropdown
-                                    value={brand}
-                                    onChange={setBrand}
-                                    options={brands}
-                                    placeholder="Select Marque..."
-                                />
-                            </div>
+                    <div className="form-grid-3">
+                        <div className="form-group" style={{ position: 'relative', zIndex: 34 }}>
+                            <label className="form-label">Model Maker</label>
+                            <CustomDropdown
+                                value={maker}
+                                onChange={setMaker}
+                                options={makers}
+                                placeholder="Select Maker..."
+                            />
                         </div>
 
-                        <div className="form-grid-3">
-                            <div className="form-group" style={{ position: 'relative', zIndex: 34 }}>
-                                <label className="form-label">Model Maker</label>
-                                <CustomDropdown
-                                    value={maker}
-                                    onChange={setMaker}
-                                    options={makers}
-                                    placeholder="Select Maker..."
-                                />
-                            </div>
-
-                            <div className="form-group" style={{ position: 'relative', zIndex: 33 }}>
-                                <label className="form-label">Scale</label>
-                                <CustomDropdown
-                                    value={scale}
-                                    onChange={setScale}
-                                    options={scaleOptions}
-                                    placeholder="Select Scale..."
-                                />
-                            </div>
-
-                            <div className="form-group">
-                                <label className="form-label">Model Year</label>
-                                <input
-                                    type="number"
-                                    className="form-input apple-input"
-                                    placeholder="e.g. 2023"
-                                    min="1900"
-                                    max="2035"
-                                    value={year}
-                                    onChange={(e) => setYear(e.target.value)}
-                                />
-                            </div>
+                        <div className="form-group" style={{ position: 'relative', zIndex: 33 }}>
+                            <label className="form-label">Scale</label>
+                            <CustomDropdown
+                                value={scale}
+                                onChange={setScale}
+                                options={scaleOptions}
+                                placeholder="Select Scale..."
+                            />
                         </div>
 
+                        <div className="form-group">
+                            <label className="form-label">Model Year</label>
+                            <input
+                                type="number"
+                                className="form-input apple-input"
+                                placeholder="e.g. 2023"
+                                min="1900"
+                                max="2035"
+                                value={year}
+                                onChange={(e) => setYear(e.target.value)}
+                            />
+                        </div>
                     </div>
 
                     <div className="modal-actions apple-modal-actions">
