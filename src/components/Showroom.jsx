@@ -1,29 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
 
-// Brand Racing Heritage Accent Colors
-const BRAND_HERITAGE_ACCENTS = {
-    'Ferrari': '#D40000',
-    'Porsche': '#E10600',
-    'McLaren': '#FF8000',
-    'Mercedes-AMG': '#00A19B',
-    'Mercedes-Benz': '#00A19B',
-    'Nissan': '#C00000',
-    'Toyota': '#EB0A1E',
-    'Lamborghini': '#E5B80B',
-    'BMW': '#0066B1',
-    'Audi': '#BB0A30',
-    'Dodge': '#D00000',
-    'Ford': '#003399',
-    'Chevrolet': '#CD9B1D',
-    'Bespoke': '#BDA794'
-};
-
 export default function Showroom({
     fleet = [],
     activeView,
-    onOpenDossier,
-    onEditCar,
-    onToggleFavorite
+    onEditCar
 }) {
     const [selectedMarque, setSelectedMarque] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
@@ -182,16 +162,11 @@ export default function Showroom({
                             </div>
                         ) : (
                             displayedGroups.map(group => {
-                                const accent = BRAND_HERITAGE_ACCENTS[group.brand] || '#BDA794';
                                 return (
                                     <div className="pavilion-brand-section" key={group.brand}>
                                         {/* Brand Header Line */}
                                         <div className="pavilion-brand-header">
                                             <div className="pavilion-brand-title-wrap">
-                                                <span
-                                                    className="pavilion-brand-accent-line"
-                                                    style={{ background: accent }}
-                                                />
                                                 <h3 className="pavilion-brand-heading">{group.brand.toUpperCase()}</h3>
                                                 <span className="pavilion-brand-badge">
                                                     {group.cars.length} {group.cars.length === 1 ? 'MODEL' : 'MODELS'}
@@ -217,14 +192,15 @@ export default function Showroom({
                                                     <div className="garage-row-right">
                                                         <button
                                                             type="button"
-                                                            className={`garage-row-fav ${car.isFavorite ? 'active' : ''}`}
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                onToggleFavorite && onToggleFavorite(car.id);
-                                                            }}
-                                                            title="Toggle Favorite"
+                                                            className="garage-row-edit"
+                                                            onClick={() => onEditCar && onEditCar(car.id)}
+                                                            title="Edit Vehicle"
+                                                            aria-label={`Edit ${car.model}`}
                                                         >
-                                                            ★
+                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                                <path d="M12 20h9" />
+                                                                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                                                            </svg>
                                                         </button>
                                                     </div>
                                                 </div>

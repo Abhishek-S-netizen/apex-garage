@@ -14,10 +14,8 @@ import {
 
 import MacDock from './components/MacDock.jsx';
 import Showroom from './components/Showroom.jsx';
-import Registry from './components/Registry.jsx';
 import Libraries from './components/Libraries.jsx';
 import VehicleModal from './components/VehicleModal.jsx';
-import DossierModal from './components/DossierModal.jsx';
 
 // Core Schema Sanitizer (Strips dead CRM fields, keeps only essential telemetry)
 export function sanitizeCar(car, index = 0) {
@@ -28,8 +26,7 @@ export function sanitizeCar(car, index = 0) {
         model: (car.model || 'Unknown Model').trim(),
         maker: (car.maker || '—').trim(),
         scale: car.scale || '1:64',
-        year: car.year ? Number(car.year) : null,
-        isFavorite: Boolean(car.isFavorite)
+        year: car.year ? Number(car.year) : null
     };
 }
 
@@ -76,9 +73,6 @@ export default function App() {
     // Modal states
     const [isCarModalOpen, setIsCarModalOpen] = useState(false);
     const [editCarId, setEditCarId] = useState(null);
-
-    const [isDossierOpen, setIsDossierOpen] = useState(false);
-    const [dossierCarId, setDossierCarId] = useState(null);
 
     // ── Linked Garage File (real cars.json on laptop disk) ──
     // status: 'checking' | 'unsupported' | 'unlinked' | 'needs-permission' | 'linked' | 'error'
@@ -292,8 +286,6 @@ export default function App() {
             if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
                 if (e.key === 'Escape') {
                     setIsCarModalOpen(false);
-                    setIsDossierOpen(false);
-                    setIsStudioOpen(false);
                 }
                 return;
             }
@@ -303,9 +295,6 @@ export default function App() {
                     setActiveView('showroom');
                     break;
                 case '2':
-                    setActiveView('registry');
-                    break;
-                case '3':
                     setActiveView('libraries');
                     break;
                 case 'n': {
@@ -321,7 +310,6 @@ export default function App() {
                     break;
                 case 'escape':
                     setIsCarModalOpen(false);
-                    setIsDossierOpen(false);
                     break;
                 default:
                     break;
@@ -372,16 +360,6 @@ export default function App() {
 
     const handleDeleteCar = (carId) => {
         const updatedFleet = apexData.fleet.filter(c => c.id !== carId);
-        saveAndSyncData({ ...apexData, fleet: updatedFleet });
-    };
-
-    const handleToggleFavorite = (carId) => {
-        const updatedFleet = apexData.fleet.map(c => {
-            if (c.id === carId) {
-                return { ...c, isFavorite: !c.isFavorite };
-            }
-            return c;
-        });
         saveAndSyncData({ ...apexData, fleet: updatedFleet });
     };
 
@@ -471,7 +449,6 @@ export default function App() {
         URL.revokeObjectURL(url);
     }, [apexData]);
 
-    const activeDossierCar = apexData.fleet.find(c => c.id === dossierCarId);
     const activeEditCar = apexData.fleet.find(c => c.id === editCarId);
 
     return (
@@ -512,6 +489,12 @@ export default function App() {
                         setEditCarId(null);
                         setIsCarModalOpen(true);
                     })}
+                    onExportJSON={handleExportJSON}
+                    onImportJSON={handleImportJSON}
+                    garageFile={garageFile}
+                    onCreateGarageFile={handleCreateGarageFile}
+                    onOpenGarageFile={handleOpenGarageFile}
+                    onReconnectGarageFile={handleReconnectGarageFile}
                 />
 
                 {/* Main Views Container */}
@@ -519,39 +502,10 @@ export default function App() {
                     <Showroom
                         fleet={apexData.fleet}
                         activeView={activeView}
-                        onOpenDossier={(carId) => {
-                            setDossierCarId(carId);
-                            setIsDossierOpen(true);
-                        }}
                         onEditCar={(carId) => runIfEditable(() => {
                             setEditCarId(carId);
                             setIsCarModalOpen(true);
                         })}
-                        onToggleFavorite={(carId) => handleToggleFavorite(carId)}
-                    />
-
-                    <Registry
-                        fleet={apexData.fleet}
-                        activeView={activeView}
-                        onOpenDossier={(carId) => {
-                            setDossierCarId(carId);
-                            setIsDossierOpen(true);
-                        }}
-                        onEditCar={(carId) => runIfEditable(() => {
-                            setEditCarId(carId);
-                            setIsCarModalOpen(true);
-                        })}
-                        onAddCar={() => runIfEditable(() => {
-                            setEditCarId(null);
-                            setIsCarModalOpen(true);
-                        })}
-                        onToggleFavorite={(carId) => handleToggleFavorite(carId)}
-                        onExportJSON={handleExportJSON}
-                        onImportJSON={handleImportJSON}
-                        garageFile={garageFile}
-                        onCreateGarageFile={handleCreateGarageFile}
-                        onOpenGarageFile={handleOpenGarageFile}
-                        onReconnectGarageFile={handleReconnectGarageFile}
                     />
 
                     <Libraries
@@ -571,21 +525,10 @@ export default function App() {
                 isOpen={isCarModalOpen}
                 onClose={() => setIsCarModalOpen(false)}
                 onSave={handleSaveCar}
+                onDelete={handleDeleteCar}
                 brands={apexData.brands}
                 makers={apexData.makers}
                 editCar={activeEditCar}
-            />
-
-            <DossierModal
-                isOpen={isDossierOpen}
-                car={activeDossierCar}
-                onClose={() => setIsDossierOpen(false)}
-                onEdit={(carId) => runIfEditable(() => {
-                    setEditCarId(carId);
-                    setIsCarModalOpen(true);
-                })}
-                onDelete={handleDeleteCar}
-                onToggleFavorite={handleToggleFavorite}
             />
 
             {/* First-run / Post-wipe Relink Overlay */}

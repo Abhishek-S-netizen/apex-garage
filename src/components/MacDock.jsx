@@ -1,14 +1,28 @@
-import React from 'react';
+import React, { useRef } from 'react';
 
 export default function MacDock({
     activeView,
     setActiveView,
     onAddCar,
-    isOwnerLoggedIn,
-    ownerUser,
-    onOpenAuthModal,
-    onSignOut
+    onExportJSON,
+    onImportJSON,
+    garageFile = { status: 'unsupported', name: null },
+    onCreateGarageFile = () => { },
+    onOpenGarageFile = () => { },
+    onReconnectGarageFile = () => { }
 }) {
+    const importInputRef = useRef(null);
+
+    const handleFileBtnClick = () => {
+        if (garageFile.status === 'needs-permission' || garageFile.status === 'error') {
+            onReconnectGarageFile();
+        } else if (garageFile.status === 'linked') {
+            onOpenGarageFile();
+        } else if (garageFile.status === 'unlinked') {
+            onCreateGarageFile();
+        }
+    };
+
     const navItems = [
         {
             key: 'showroom',
@@ -39,29 +53,9 @@ export default function MacDock({
             )
         },
         {
-            key: 'registry',
-            label: 'Registry',
-            title: 'Master Fleet Registry (Key 2)',
-            renderIcon: (isActive) => isActive ? (
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" fill="#E1E1E1" />
-                    <polyline points="14 2 14 8 20 8" fill="#2C3752" />
-                    <line x1="16" y1="13" x2="8" y2="13" stroke="#2C3752" strokeWidth="2" strokeLinecap="round" />
-                    <line x1="16" y1="17" x2="8" y2="17" stroke="#2C3752" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-            ) : (
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                    <line x1="16" y1="13" x2="8" y2="13" />
-                    <line x1="16" y1="17" x2="8" y2="17" />
-                </svg>
-            )
-        },
-        {
             key: 'libraries',
             label: 'Libraries',
-            title: 'Marque & Maker Libraries (Key 3)',
+            title: 'Marque & Maker Libraries (Key 2)',
             renderIcon: (isActive) => isActive ? (
                 <svg width="22" height="22" viewBox="0 0 24 24">
                     <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" fill="#E1E1E1" />
@@ -109,6 +103,69 @@ export default function MacDock({
 
                 {/* Dock Action Items */}
                 <div className="dock-actions">
+                    {garageFile.status !== 'unsupported' && garageFile.status !== 'checking' && (
+                        <button
+                            type="button"
+                            className={`dock-util-btn dock-file-btn status-${garageFile.status}`}
+                            onClick={handleFileBtnClick}
+                            title={
+                                garageFile.status === 'linked'
+                                    ? `Saving to ${garageFile.name} — click to switch file`
+                                    : garageFile.status === 'unlinked'
+                                        ? 'Link cars.json on disk'
+                                        : `Reconnect ${garageFile.name}`
+                            }
+                            aria-label="Garage File Sync"
+                        >
+                            <span className={`garage-file-dot status-${garageFile.status}`} />
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                            </svg>
+                        </button>
+                    )}
+
+                    <button
+                        type="button"
+                        className="dock-util-btn"
+                        onClick={() => importInputRef.current?.click()}
+                        title="Import JSON backup"
+                        aria-label="Import JSON"
+                    >
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="17 8 12 3 7 8" />
+                            <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                    </button>
+                    <input
+                        ref={importInputRef}
+                        type="file"
+                        accept=".json,application/json"
+                        style={{ display: 'none' }}
+                        onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file && onImportJSON) {
+                                onImportJSON(file);
+                                e.target.value = '';
+                            }
+                        }}
+                    />
+
+                    <button
+                        type="button"
+                        className="dock-util-btn"
+                        onClick={onExportJSON}
+                        title="Export JSON backup"
+                        aria-label="Export JSON"
+                    >
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                    </button>
+
                     <button
                         className="dock-register-btn"
                         onClick={onAddCar}

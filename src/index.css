@@ -719,27 +719,6 @@ body {
     flex-shrink: 0;
 }
 
-.garage-row-fav {
-    background: none;
-    border: none;
-    font-size: 15px;
-    color: rgba(32, 38, 44, 0.25);
-    cursor: pointer;
-    transition: color 0.18s ease, transform 0.18s ease;
-    padding: 4px 6px;
-    line-height: 1;
-}
-
-.garage-row-fav:hover {
-    transform: scale(1.15);
-    color: #FC6200;
-}
-
-.garage-row-fav.active {
-    color: #FC6200;
-    text-shadow: 0 0 8px rgba(252, 98, 0, 0.5);
-}
-
 .garage-prompt-state {
     padding: 90px 20px;
     display: flex;
@@ -906,13 +885,6 @@ body {
     gap: 12px;
 }
 
-.pavilion-brand-accent-line {
-    width: 3px;
-    height: 16px;
-    border-radius: 2px;
-    opacity: 0.85;
-}
-
 .pavilion-brand-heading {
     font-family: var(--font-head);
     font-size: 16px;
@@ -925,37 +897,11 @@ body {
     font-family: var(--font-mono);
     font-size: 9.5px;
     font-weight: 700;
-    color: #B31400;
-    background: rgba(179, 20, 0, 0.10);
-    border: 1px solid rgba(179, 20, 0, 0.40);
+    color: #E95532;
+    background: rgba(233, 85, 50, 0.12);
+    border: 1px solid rgba(233, 85, 50, 0.45);
     padding: 2px 8px;
     border-radius: 4px;
-}
-
-
-
-
-
-/* ──────────────────────────────────────────────────────────────────
-   STAGE 2: 3D COVER FLOW CAROUSEL RING FLOOR
-────────────────────────────────────────────────────────────────── */
-
-
-.carousel-fav-star {
-    font-size: 18px;
-    color: rgba(255, 255, 255, 0.3);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    padding: 2px;
-}
-
-.carousel-fav-star.active {
-    color: #FFD700;
-    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.7));
-}
-
-.carousel-fav-star:hover {
-    transform: scale(1.2);
 }
 
 /* ══════════════════════════════════════════════════════════════════
@@ -2402,575 +2348,75 @@ body.zen-mode .macos-dock-header {
     box-shadow: none;
 }
 
-/* ══════════════════════════════════════════════════════════════════
-   MOBILE & RESPONSIVE TELEMETRY SYSTEM (< 768px & < 480px)
-   Engineered without modifying or breaking any desktop viewports.
-══════════════════════════════════════════════════════════════════ */
-@media (max-width: 768px) {
-
-    /* 1. Shell & Safe Area Spacing (Notch / Dynamic Island Protection) */
-    .app-shell {
-        height: auto;
-        max-height: none;
-        overflow: visible;
-        padding: max(38px, env(safe-area-inset-top, 38px)) 14px calc(132px + env(safe-area-inset-bottom, 22px));
-        gap: 14px;
-    }
-
-    .main-stage,
-    .view-panel,
-    .view-panel.active,
-    .unified-garage-stage,
-    .registry-wrapper,
-    .libraries-wrapper {
-        height: auto;
-        max-height: none;
-    }
-
-    .garage-grid-container,
-    .registry-table-card,
-    .registry-table-wrap,
-    .libraries-split-grid {
-        max-height: none;
-        overflow: visible;
-    }
-
-    /* 2. Substantial, Ergonomic Floating Luxury Capsule Dock (Thicker & Lifted) */
-    .macos-dock-header {
-        position: fixed;
-        bottom: max(26px, calc(env(safe-area-inset-bottom, 0px) + 22px));
-        left: 0;
-        right: 0;
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-        pointer-events: none;
-        padding: 0;
-    }
-
-    .macos-dock {
-        pointer-events: auto;
-        display: inline-flex;
-        align-items: center;
-        width: auto;
-        max-width: calc(100vw - 20px);
-        background: #BDA794;
-        border: 2px solid rgba(255, 255, 255, 0.75);
-        border-radius: 999px;
-        padding: 16px 16px;
-        gap: 5px;
-        box-shadow: 0 20px 48px rgba(0, 0, 0, 0.9), 0 2px 14px rgba(0, 0, 0, 0.45);
-        transform: translateY(0);
-        margin: 0 auto;
-        box-sizing: border-box;
-    }
-
-    .dock-app-brand,
-    .dock-separator {
-        display: none !important;
-    }
-
-    .dock-nav {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        flex: initial;
-    }
-
-    .dock-item {
-        padding: 0;
-        border-radius: 50%;
-        width: 38px;
-        height: 38px;
-        min-width: 38px;
-        flex: initial;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .dock-icon-box svg {
-        width: 20px;
-        height: 20px;
-    }
-
-    /* Hide text labels on phone for a compact, ergonomic floating capsule */
-    .dock-label {
-        display: none !important;
-    }
-
-    .dock-actions {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        margin-left: 3px;
-    }
-
-    .dock-action-btn {
-        width: 38px;
-        height: 38px;
-        min-width: 38px;
-        border-radius: 50%;
-        padding: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .dock-action-btn svg {
-        width: 18px;
-        height: 18px;
-    }
-
-    .dock-register-btn {
-        width: 38px;
-        height: 38px;
-        min-width: 38px;
-        border-radius: 50%;
-        padding: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .dock-register-btn span:last-child {
-        display: none;
-    }
-
-    .dock-register-btn span:first-child {
-        font-size: 22px;
-        line-height: 1;
-        margin: 0;
-        font-weight: 700;
-    }
-
-    /* 4. Showroom Mobile Polish */
-
-    .curator-tag-pill {
-        font-size: 9px;
-        padding: 3px 10px;
-        letter-spacing: 0.12em;
-        text-align: center;
-        margin: 0 auto;
-    }
-
-    .curator-hero-title {
-        font-family: var(--font-head), 'Syncopate', sans-serif !important;
-        font-size: 15px !important;
-        font-weight: 700 !important;
-        letter-spacing: 0.1em !important;
-        line-height: 1.3 !important;
-        text-transform: uppercase !important;
-        text-align: center !important;
-        margin: 0 auto;
-    }
-
-    .curator-toolbar {
-        padding: 0;
-        margin-bottom: 14px;
-        gap: 10px;
-        background: transparent;
-        border: none;
-        border-radius: 0;
-        box-shadow: none;
-    }
-
-    .curator-search-box {
-        width: 100%;
-        border-radius: 8px;
-    }
-
-    .curator-scale-pills {
-        width: 100%;
-        overflow-x: auto;
-        justify-content: flex-start;
-        gap: 6px;
-        padding-bottom: 4px;
-        scrollbar-width: none;
-    }
-
-    .curator-scale-pills::-webkit-scrollbar {
-        display: none;
-    }
-
-    .curator-scale-btn {
-        padding: 5px 10px;
-        font-size: 10px;
-        border-radius: 8px;
-        flex-shrink: 0;
-    }
-
-    .garage-split-stage {
-        flex-direction: column;
-        gap: 12px;
-    }
-
-    .garage-marque-pills-bar {
-        flex-direction: row;
-        flex-wrap: nowrap;
-        width: 100%;
-        overflow-x: auto;
-        overflow-y: visible;
-        padding: 4px 0 8px;
-        border-right: none;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-    }
-
-    .garage-marque-pill {
-        width: auto;
-        justify-content: center;
-        flex-shrink: 0;
-        background: rgba(255, 255, 255, 0.06);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 8px;
-        padding: 7px 14px;
-    }
-
-    .garage-marque-pills-bar::-webkit-scrollbar {
-        display: none;
-    }
-
-    /* Showroom Brand Section & Spec Rows Mobile Polish */
-    .pavilion-brand-section {
-        gap: 14px !important;
-        margin-bottom: 74px !important;
-    }
-
-    .pavilion-brand-header {
-        padding-bottom: 10px !important;
-        margin-bottom: 4px !important;
-    }
-
-    .pavilion-brand-heading {
-        font-size: 14.5px !important;
-        letter-spacing: 0.12em !important;
-    }
-
-    .garage-spec-row {
-        padding: 12px 2px;
-        align-items: flex-start;
-    }
-
-    .garage-row-left {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 6px;
-    }
-
-    .garage-row-details {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 3px;
-    }
-
-    .garage-row-model {
-        font-size: 14px;
-    }
-
-    .garage-header {
-        align-items: center;
-        text-align: center;
-    }
-
-    .garage-title-row {
-        justify-content: center;
-    }
-
-    /* 6. Floating Modals & Dossier Cards on Mobile */
-    .modal-overlay {
-        padding: 16px;
-        align-items: center;
-        justify-content: center;
-        backdrop-filter: blur(14px);
-    }
-
-    .modal-card {
-        width: min(92vw, 380px) !important;
-        max-width: 380px !important;
-        border-radius: 16px !important;
-        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(189, 167, 148, 0.3) !important;
-        margin: auto;
-    }
-
-    .modal-card.apple-modal-sheet {
-        width: min(92vw, 380px) !important;
-        max-width: 380px !important;
-        border-radius: 16px !important;
-        padding: 18px 16px 14px;
-        max-height: 84vh;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        margin: auto;
-    }
-
-    .modal-card.modal-xl {
-        width: min(92vw, 380px) !important;
-        max-width: 380px !important;
-        border-radius: 16px !important;
-        max-height: 84vh;
-        padding: 18px 16px 14px;
-        overflow-y: auto;
-        margin: auto;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .modal-card.apple-modal-sheet .modal-header {
-        margin-bottom: 12px;
-    }
-
-    .modal-card.apple-modal-sheet .modal-title {
-        font-size: 17px;
-    }
-
-    .apple-modal-form {
-        display: flex;
-        flex-direction: column;
-        overflow-y: auto;
-        flex: 1;
-        padding-right: 2px;
-        gap: 10px;
-        margin-bottom: 6px;
-        scrollbar-width: thin;
-    }
-
-    .form-grid-2,
-    .form-grid-3 {
-        grid-template-columns: 1fr;
-        gap: 8px;
-    }
-
-    .apple-form-section {
-        padding: 10px 12px;
-        border-radius: 12px;
-        gap: 7px;
-    }
-
-    .apple-input,
-    .custom-dropdown-trigger {
-        padding: 7px 11px !important;
-        font-size: 13px !important;
-        border-radius: 8px !important;
-    }
-
-    .apple-modal-actions {
-        position: sticky;
-        bottom: 0;
-        width: 100%;
-        background: #1A1819;
-        padding-top: 10px;
-        padding-bottom: env(safe-area-inset-bottom, 8px);
-        margin-top: auto;
-        border-top: 1px solid rgba(189, 167, 148, 0.2);
-        display: flex;
-        gap: 10px;
-        z-index: 10;
-    }
-
-    .btn-modal-cancel {
-        flex: 1;
-        padding: 9px 12px;
-        text-align: center;
-        justify-content: center;
-        border-radius: 8px;
-    }
-
-    .btn-modal-save {
-        flex: 2;
-        padding: 9px 14px;
-        text-align: center;
-        justify-content: center;
-        border-radius: 8px;
-    }
-
-    .dossier-layout {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-
-    .dossier-hero-wrap {
-        height: 170px;
-        min-height: 170px;
-        border-radius: 12px;
-    }
-
-    /* 8. Master Registry Mobile Polish */
-    .registry-top-shelf {
-        background: #E1E1E1;
-        border: none;
-        border-radius: 8px;
-        padding: 16px 18px;
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
-    }
-
-    .registry-actions {
-        width: 100%;
-        display: flex;
-        gap: 8px;
-    }
-
-    .registry-actions button {
-        flex: 1;
-        justify-content: center;
-        padding: 9px 12px;
-        border-radius: 6px;
-        font-size: 11px;
-    }
-
-    .registry-table-card {
-        padding: 8px 10px;
-        border-radius: 8px;
-    }
-
-    .registry-table-wrap {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        border-radius: 10px;
-    }
-
-    /* 9. Libraries Mobile Polish */
-    .libraries-header {
-        background: #E1E1E1;
-        border: none;
-        padding: 16px 18px;
-        border-radius: 8px;
-        gap: 10px;
-    }
-
-    .libraries-split-grid {
-        grid-template-columns: 1fr;
-        gap: 14px;
-    }
-
-    .library-card {
-        padding: 16px;
-        border-radius: 8px;
-        gap: 12px;
-    }
-
-    .library-card-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-    }
-
-    .library-add-inline {
-        width: 100%;
-    }
-
-    .library-add-inline input {
-        flex: 1;
-        border-radius: 8px;
-        padding: 7px 10px;
-        font-size: 12px;
-    }
-
-    .library-chip {
-        border-radius: 8px;
-    }
-}
-
-@media (max-width: 420px) {
-    .app-shell {
-        padding: max(36px, env(safe-area-inset-top, 36px)) 10px calc(128px + env(safe-area-inset-bottom, 20px));
-    }
-
-    .macos-dock {
-        max-width: calc(100vw - 16px);
-        padding: 14px 14px;
-        gap: 4.5px;
-    }
-
-    .dock-nav {
-        gap: 4.5px;
-    }
-
-    .dock-item {
-        padding: 0;
-        width: 36px;
-        height: 36px;
-        min-width: 36px;
-    }
-
-    .dock-icon-box svg {
-        width: 19px;
-        height: 19px;
-    }
-
-    .dock-actions {
-        gap: 4.5px;
-        margin-left: 2px;
-    }
-
-    .dock-register-btn {
-        width: 36px;
-        height: 36px;
-        min-width: 36px;
-    }
-
-    .dock-label {
-        display: none !important;
-    }
-}
-
-.dossier-spec-plaque {
-    width: 100%;
-    height: 100%;
-    min-height: 240px;
-    background: radial-gradient(circle at 50% 30%, rgba(189, 167, 148, 0.12) 0%, rgba(20, 18, 19, 0.95) 100%);
-    border: 1px solid rgba(189, 167, 148, 0.25);
-    border-radius: 14px;
-    display: flex;
-    flex-direction: column;
+/* Dock Utility Buttons (File Link, Import, Export) */
+.dock-util-btn {
+    background: rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.16);
+    color: #111111;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    text-align: center;
-    padding: 24px;
-    gap: 8px;
-    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.6);
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    padding: 0;
 }
 
-.dossier-plaque-marque {
-    font-family: var(--font-header, 'Syncopate', sans-serif);
-    font-size: 11px;
-    letter-spacing: 0.22em;
-    color: var(--accent, #BDA794);
-    font-weight: 700;
+.dock-util-btn:hover {
+    background: rgba(0, 0, 0, 0.16);
+    color: #000000;
+    transform: translateY(-2px);
 }
 
-.dossier-plaque-title {
-    font-family: var(--font-mono, 'Jura', sans-serif);
-    font-size: 20px;
-    font-weight: 700;
+.dock-file-btn {
+    gap: 5px;
+    width: auto;
+    padding: 0 10px;
+}
+
+/* Showroom Row Edit Action */
+.garage-row-edit {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.45);
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.garage-row-spec:hover .garage-row-edit,
+.garage-spec-row:hover .garage-row-edit,
+.garage-row-edit:hover {
     color: #FFFFFF;
-    margin: 4px 0;
-    letter-spacing: -0.02em;
-    max-width: 90%;
+    border-color: rgba(189, 167, 148, 0.45);
+    background: rgba(255, 255, 255, 0.08);
 }
 
-.dossier-plaque-maker {
-    font-size: 11px;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.5);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-}
-
-.dossier-plaque-scale {
-    margin-top: 8px;
-    font-family: var(--font-mono, 'Jura', sans-serif);
-    font-size: 11px;
-    padding: 3px 10px;
-    border-radius: 20px;
-    background: rgba(189, 167, 148, 0.15);
-    color: var(--accent, #BDA794);
-    border: 1px solid rgba(189, 167, 148, 0.3);
+/* VehicleModal Delete Button */
+.btn-modal-delete {
+    margin-right: auto;
+    background: rgba(255, 59, 48, 0.12);
+    border: 1px solid rgba(255, 59, 48, 0.35);
+    color: #FF6B63;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-family: var(--font-mono);
+    font-size: 12px;
     font-weight: 700;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.btn-modal-delete:hover {
+    background: rgba(255, 59, 48, 0.24);
+    border-color: rgba(255, 59, 48, 0.65);
+    color: #FFFFFF;
 }

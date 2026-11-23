@@ -5,6 +5,7 @@ export default function VehicleModal({
     isOpen,
     onClose,
     onSave,
+    onDelete,
     brands,
     makers,
     editCar = null
@@ -14,7 +15,6 @@ export default function VehicleModal({
     const [maker, setMaker] = useState('');
     const [scale, setScale] = useState('1:18');
     const [year, setYear] = useState('');
-    const [isFavorite, setIsFavorite] = useState(false);
 
     useEffect(() => {
         if (editCar) {
@@ -23,14 +23,12 @@ export default function VehicleModal({
             setMaker(editCar.maker || (makers[0] || ''));
             setScale(editCar.scale || '1:18');
             setYear(editCar.year || '');
-            setIsFavorite(!!editCar.isFavorite);
         } else {
             setModel('');
             setBrand(brands[0] || 'Porsche');
             setMaker(makers[0] || 'AutoArt');
             setScale('1:18');
             setYear('');
-            setIsFavorite(false);
         }
     }, [editCar, brands, makers, isOpen]);
 
@@ -44,8 +42,7 @@ export default function VehicleModal({
             brand,
             maker,
             scale,
-            year: Number(year) || null,
-            isFavorite
+            year: Number(year) || null
         });
         onClose();
     };
@@ -136,22 +133,23 @@ export default function VehicleModal({
                             </div>
                         </div>
 
-                        {/* Integrated Pin as Favorite Row */}
-                        <div className="apple-toggle-row integrated-favorite-row">
-                            <span className="apple-toggle-title">★ Pin as Favorite</span>
-                            <button
-                                type="button"
-                                role="switch"
-                                aria-checked={isFavorite}
-                                className={`apple-switch ${isFavorite ? 'active' : ''}`}
-                                onClick={() => setIsFavorite(!isFavorite)}
-                            >
-                                <span className="apple-switch-thumb" />
-                            </button>
-                        </div>
                     </div>
 
                     <div className="modal-actions apple-modal-actions">
+                        {editCar && onDelete && (
+                            <button
+                                type="button"
+                                className="btn-modal-delete"
+                                onClick={() => {
+                                    if (window.confirm('Are you sure you want to remove this vehicle from your garage?')) {
+                                        onDelete(editCar.id);
+                                        onClose();
+                                    }
+                                }}
+                            >
+                                Delete
+                            </button>
+                        )}
                         <button type="button" className="btn-modal-cancel" onClick={onClose}>
                             Cancel
                         </button>
